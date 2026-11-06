@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Карта столовых и коворкингов кампуса МАИ. Студенческий проект.">
+  <title>Столовые и коворкинги МАИ</title>
+
+  <!-- Telegram Web App SDK. Подключаем официальным скриптом и первым,
+       как советует Telegram. В обычном браузере он тоже загружается,
+       но приложение проверяет, что открыто именно в Telegram (см. js/telegram.js). -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!--
+    Тексты интерфейса НЕ пишем здесь: их подставляет js/ui.js из js/texts.js
+    по атрибутам data-text="ключ" и data-aria-label="ключ".
+  -->
+  <div id="app" class="app">
+
+    <!-- ================= Верхняя панель ================= -->
+    <header class="topbar">
+      <!-- Первый ряд: как показывать (карта или список) и «Открыто сейчас». -->
+      <div class="topbar__row">
+        <div class="segmented" role="group" data-aria-label="views.groupLabel">
+          <button type="button" data-view="map" aria-pressed="true" data-text="views.map"></button>
+          <button type="button" data-view="list" aria-pressed="false" data-text="views.list"></button>
+        </div>
+        <button type="button" class="chip" id="chip-open-now" aria-pressed="false" data-text="filters.openNow"></button>
+      </div>
+      <!-- Второй ряд: что показывать (все, еда, коворкинги) и «О проекте». -->
+      <div class="topbar__row">
+        <div class="chips" role="group" data-aria-label="filters.groupLabel">
+          <button type="button" class="chip" data-category="all" aria-pressed="true" data-text="filters.all"></button>
+          <button type="button" class="chip" data-category="food" aria-pressed="false">
+            <span class="chip__dot chip__dot--food" aria-hidden="true"></span><span data-text="filters.food"></span>
+          </button>
+          <button type="button" class="chip" data-category="cowork" aria-pressed="false">
+            <span class="chip__dot chip__dot--cowork" aria-hidden="true"></span><span data-text="filters.cowork"></span>
+          </button>
+        </div>
+        <button type="button" id="about-button" class="icon-button icon-button--info" data-aria-label="aboutButton">i</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- ================= Карта ================= -->
+      <section id="map-view" class="map-view">
+        <div id="map" class="map"></div>
+
+        <div class="legend">
+          <p class="visually-hidden" data-text="legend.title"></p>
+          <ul>
+            <li><span class="legend__dot legend__dot--food" aria-hidden="true"></span><span data-text="legend.food"></span></li>
+            <li><span class="legend__dot legend__dot--cowork" aria-hidden="true"></span><span data-text="legend.cowork"></span></li>
+            <li><span class="legend__dot legend__dot--closed" aria-hidden="true"></span><span data-text="legend.closed"></span></li>
+          </ul>
+        </div>
+
+        <p id="debug-badge" class="debug-badge" data-text="debug.badge" hidden></p>
+
+        <div id="map-error" class="map-error" role="alert" hidden>
+          <p class="map-error__title" data-text="map.loadError"></p>
+          <p data-text="map.loadErrorHint"></p>
+          <button type="button" id="map-error-list" class="button" data-text="map.openList"></button>
+        </div>
+      </section>
+
+      <!-- ================= Список ================= -->
+      <section id="list-view" class="list-view" hidden>
+        <h1 class="visually-hidden" data-text="list.title"></h1>
+        <ul id="places-list" class="places-list"></ul>
+        <p id="list-empty" class="message" data-text="list.empty" hidden></p>
+      </section>
+
+      <!-- ================= Карточка места (выезжает снизу) ================= -->
+      <section id="sheet" class="sheet" role="dialog" aria-modal="false" aria-labelledby="sheet-title" hidden>
+        <div id="sheet-content"></div>
+      </section>
+    </main>
+
+    <!-- ================= Экран меню ================= -->
+    <section id="menu-screen" class="screen" role="dialog" aria-modal="true" aria-labelledby="menu-title" hidden>
+      <header class="screen__header">
+        <!-- В Telegram эта кнопка скрыта: там есть системная «Назад». -->
+        <button type="button" id="menu-back" class="back-button">
+          <span aria-hidden="true">←</span> <span data-text="menu.back"></span>
+        </button>
+        <h2 id="menu-title" class="screen__title" tabindex="-1"></h2>
+      </header>
+      <div id="menu-content" class="screen__body"></div>
+    </section>
+
+    <!-- ================= О проекте ================= -->
+    <div id="about-dialog" class="modal" hidden>
+      <section class="modal__box" role="dialog" aria-modal="true" aria-labelledby="about-title">
+        <h2 id="about-title" data-text="about.title"></h2>
+        <div id="about-text"></div>
+        <button type="button" id="about-close" class="button" data-text="about.close"></button>
+      </section>
+    </div>
+
+    <!-- ================= Загрузка / ошибка данных ================= -->
+    <div id="status-screen" class="status-screen" role="status" aria-live="polite">
+      <!-- «Загрузка…» написано прямо здесь, потому что этот текст должен быть
+           виден ещё до того, как запустится JavaScript. -->
+      <p id="status-text" class="status-screen__title">Загрузка…</p>
+      <p id="status-hint" class="status-screen__hint"></p>
+      <button type="button" id="retry-button" class="button" data-text="errors.retry" hidden></button>
+    </div>
+
+    <!-- Короткие сообщения («Скопировано») -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </div>
+
+  <script>
+    // Если открыть index.html двойным кликом (адрес начинается с file://),
+    // браузер из соображений безопасности не даст загрузить модули и CSV,
+    // и приложение не запустится. Подсказываем, что делать (подробнее в README).
+    // Этот текст здесь, а не в texts.js, потому что модули в этом случае не работают.
+    if (location.protocol === 'file:') {
+      document.getElementById('status-text').textContent =
+        'Откройте приложение через локальный сервер: в папке проекта выполните «python -m http.server» и откройте http://localhost:8000';
+    }
+  </script>
+
+  <!-- Библиотеки лежат в vendor/ (а не на CDN: CDN бывают недоступны). -->
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/papaparse/papaparse.min.js"></script>
+  <!-- Наше приложение. type="module" — можно использовать import/export. -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
