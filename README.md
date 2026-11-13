@@ -182,6 +182,8 @@ CSV UTF-8 в `data/objects.csv` и `data/menu.csv` или загрузите ф�
 
 ### Бот
 
+Бот проекта: **[@StolovayaMAI_bot](https://t.me/StolovayaMAI_bot)**.
+
 В папке `bot/` — простой бот на [aiogram 3](https://docs.aiogram.dev): на `/start` присылает кнопку
 «Открыть карту» и ставит кнопку «Карта» рядом с полем ввода.
 
@@ -200,8 +202,8 @@ CSV UTF-8 в `data/objects.csv` и `data/menu.csv` или загрузите ф�
 
 ### Ссылки и QR-коды на место
 
-- `https://t.me/<имя_бота>?start=place_3` — бот пришлёт кнопку, которая откроет место № 3;
-- `https://t.me/<имя_бота>/map?startapp=place_3` — сразу открывает приложение на месте № 3
+- `https://t.me/StolovayaMAI_bot?start=place_3` — бот пришлёт кнопку, которая откроет место № 3;
+- `https://t.me/StolovayaMAI_bot/map?startapp=place_3` — сразу открывает приложение на месте № 3
   (нужно один раз создать Mini App в @BotFather: `/newapp`, короткое имя `map`);
 - `https://<сайт>/?place=3` — то же самое в обычном браузере.
 

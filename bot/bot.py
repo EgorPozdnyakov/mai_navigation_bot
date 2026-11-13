@@ -4,7 +4,8 @@
 #   pip install -r bot/requirements.txt
 #   BOT_TOKEN=123:abc WEBAPP_URL=https://<логин>.github.io/<репозиторий>/ python bot/bot.py
 #
-# Ссылка t.me/<имя_бота>?start=place_3 откроет сразу карточку места № 3 (удобно для QR-кодов).
+# Бот проекта: @StolovayaMAI_bot. Токен не храните в коде и не отправляйте в git.
+# Ссылка t.me/StolovayaMAI_bot?start=place_3 откроет сразу карточку места № 3 (удобно для QR-кодов).
 
 import asyncio
 import os
