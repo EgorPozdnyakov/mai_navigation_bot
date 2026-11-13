@@ -1,10 +1,11 @@
 // map.js — карта кампуса на Leaflet.
 //
 // Основа карты — картинка media/map.jpg. В режиме L.CRS.Simple координаты — просто числа.
-// В таблице map_x идёт вправо, map_y — вниз, а у Leaflet первая координата растёт вверх.
+// В places.js x идёт вправо, y — вниз, а у Leaflet первая координата растёт вверх.
 // Поэтому точка картинки (x, y) для Leaflet — это [-y, x].
 
-import { CONFIG } from './config.js';
+const MAP_IMAGE = 'media/map.jpg';
+const MAX_ZOOM = 1; // насколько можно приблизить: 0 — пиксель в пиксель, 1 — в 2 раза крупнее
 
 let map = null;
 let bounds = null;     // прямоугольник картинки
@@ -24,9 +25,9 @@ function loadImage(url) {
 }
 
 // Создаёт карту. Размеры картинки узнаём при загрузке, в коде их нет.
-// debug — режим разметки (?debug=1): по нажатию показываем map_x и map_y.
+// debug — режим разметки (?debug=1): по нажатию показываем координаты x и y.
 export async function createMap(debug, onMapClick) {
-  const image = await loadImage(CONFIG.mapImage);
+  const image = await loadImage(MAP_IMAGE);
   width = image.naturalWidth;
   height = image.naturalHeight;
   bounds = L.latLngBounds([-height, 0], [0, width]);
@@ -42,7 +43,7 @@ export async function createMap(debug, onMapClick) {
   // Кнопки +/− и подпись — справа внизу, сверху их закрывали бы фильтры.
   L.control.zoom({ position: 'bottomright', zoomInTitle: 'Приблизить', zoomOutTitle: 'Отдалить' }).addTo(map);
   L.control.attribution({ position: 'bottomright', prefix: 'Leaflet' }).addTo(map);
-  L.imageOverlay(CONFIG.mapImage, bounds, { attribution: 'Карта: mai-sten.online', alt: 'Схема кампуса МАИ' }).addTo(map);
+  L.imageOverlay(MAP_IMAGE, bounds, { attribution: 'Карта: mai-sten.online', alt: 'Схема кампуса МАИ' }).addTo(map);
 
   updateZoomLimits();
   map.fitBounds(bounds, { animate: false });
@@ -60,12 +61,12 @@ export async function createMap(debug, onMapClick) {
   });
 }
 
-// Отдалить можно до «вся карта на экране», приблизить — до CONFIG.maxZoom.
+// Отдалить можно до «вся карта на экране», приблизить — до MAX_ZOOM.
 function updateZoomLimits() {
   map.options.minZoom = -10; // снимаем старые пределы, иначе getBoundsZoom их учтёт
   map.options.maxZoom = 10;
   fitZoom = map.getBoundsZoom(bounds);
-  map.setMaxZoom(Math.max(CONFIG.maxZoom, fitZoom));
+  map.setMaxZoom(Math.max(MAX_ZOOM, fitZoom));
   map.setMinZoom(fitZoom);
 }
 
@@ -86,24 +87,23 @@ export function refreshSize() {
   if (map) map.invalidateSize();
 }
 
-// Ставит метки мест. Места без map_x/map_y пропускаем.
+// Ставит метки столовых.
 export function addMarkers(places, debug, onClick) {
   for (const place of places) {
-    if (place.mapX === null) continue;
     // Метка — область 44×44 px (легко попасть пальцем), внутри кружок с номером.
     const icon = L.divIcon({
-      className: 'marker marker--' + place.group,
+      className: 'marker',
       html: `<span class="marker__dot" aria-hidden="true">${place.id}</span>`,
       iconSize: [44, 44],
     });
-    const marker = L.marker([-place.mapY, place.mapX], { icon });
+    const marker = L.marker([-place.y, place.x], { icon });
     marker.on('click', () => onClick(place.id));
     // С клавиатуры: Tab — перейти к метке, Enter — открыть.
     marker.on('keypress', (event) => {
       if (event.originalEvent.key === 'Enter') onClick(place.id);
     });
     if (debug) {
-      marker.bindTooltip(`id ${place.id} (${place.mapX}, ${place.mapY})`, { permanent: true, direction: 'right', offset: [14, 0] });
+      marker.bindTooltip(`id ${place.id} (${place.x}, ${place.y})`, { permanent: true, direction: 'right', offset: [14, 0] });
     }
     markers[place.id] = marker;
   }
@@ -142,17 +142,15 @@ export function showPlace(id, zoomIn) {
   map.setView(map.unproject(center, zoom), zoom);
 }
 
-// Режим разметки: показываем map_x и map_y точки и кнопку «Скопировать».
-// Копируем через табуляцию — в таблице числа сами встанут в две соседние ячейки.
+// Режим разметки: показываем x и y точки и кнопку «Скопировать».
 function showCoordinates(latlng) {
   const x = Math.round(latlng.lng);
   const y = Math.round(-latlng.lat);
-  let html = `<b>map_x: ${x}, map_y: ${y}</b><br>`;
+  let html = `<b>x: ${x}, y: ${y}</b><br>`;
   if (x < 0 || y < 0 || x > width || y > height) {
     html += '<small>Эта точка за краем картинки</small>';
   } else {
     html += '<button type="button" class="button button--small" id="copy-button">Скопировать</button>';
-    html += '<br><small>Вставится в таблицу сразу в две ячейки</small>';
   }
   L.popup().setLatLng(latlng).setContent(html).openOn(map);
 
@@ -160,7 +158,7 @@ function showCoordinates(latlng) {
   if (!button) return;
   button.onclick = async () => {
     try {
-      await navigator.clipboard.writeText(x + '\t' + y);
+      await navigator.clipboard.writeText(`x: ${x}, y: ${y}`);
       button.textContent = 'Скопировано';
     } catch (error) {
       button.textContent = 'Не вышло, перепишите вручную';

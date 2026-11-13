@@ -7,6 +7,7 @@
   --surface: #ffffff;      /* фон карточек */
   --surface-2: #f1f3f5;    /* фон второстепенных элементов */
   --text: #1b1f24;
+  --marker: #c0262d;       /* метки столовых */
   --hint: #5c6670;         /* серый текст */
   --link: #1f6fd1;
   --accent: #1f6fd1;       /* основные кнопки и включённые фильтры */
@@ -14,11 +15,6 @@
   --border: rgba(0, 0, 0, 0.14);
   --open: #1e7b34;
   --closed: #b42318;
-  --veg-bg: #d3f9d8;
-  --veg-text: #1e5b2a;
-  --food: #c0262d;         /* метки мест питания */
-  --cowork: #6d28d9;       /* метки коворкингов */
-  --other: #495057;        /* тип в таблице записан с ошибкой */
   --shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
   color-scheme: light;
 }
@@ -34,8 +30,6 @@
   --border: rgba(255, 255, 255, 0.16);
   --open: #5fd07a;
   --closed: #ff8f85;
-  --veg-bg: #1f3b26;
-  --veg-text: #a6e3b4;
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
   color-scheme: dark;
 }
@@ -64,7 +58,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .hint { margin: 8px 0 0; color: var(--hint); font-size: 14px; }
 .message { margin: 24px auto; max-width: 480px; text-align: center; color: var(--hint); }
-.no-data { color: var(--hint); font-style: italic; }
 
 /* ---------- Кнопки ---------- */
 .button {
@@ -151,9 +144,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
-.dot--food { background: var(--food); }
-.dot--cowork { background: var(--cowork); }
-.dot--closed { background: var(--food); opacity: 0.8; filter: grayscale(0.75); }
+.dot { background: var(--marker); }
+.dot--closed { opacity: 0.8; filter: grayscale(0.75); }
 
 /* ---------- Карта ---------- */
 .main { position: relative; flex: 1; min-height: 0; }
@@ -177,7 +169,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   height: 30px;
   border: 2.5px solid #ffffff;
   border-radius: 50%;
-  background: var(--food);
+  background: var(--marker);
   color: #ffffff;
   font-size: 15px;
   font-weight: 700;
@@ -185,8 +177,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
   transition: transform 0.15s;
 }
 
-.marker--cowork .marker__dot { background: var(--cowork); }
-.marker--other .marker__dot { background: var(--other); }
 .marker.is-closed .marker__dot { opacity: 0.8; filter: grayscale(0.75); }
 .marker.is-selected .marker__dot {
   transform: scale(1.35);
@@ -292,21 +282,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
   height: 26px;
   padding: 0 6px;
   border-radius: 13px;
-  background: var(--food);
+  background: var(--marker);
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
 }
 
-.badge--cowork { background: var(--cowork); }
-.badge--other { background: var(--other); }
 
 /* Статус с точкой. Цвет — не единственный признак: рядом всегда текст. */
 .status { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font-weight: 600; }
 .status::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
 .status--open { color: var(--open); }
 .status--closed { color: var(--closed); }
-.status--unknown { color: var(--hint); }
 
 /* ---------- Карточка места (выезжает снизу) ---------- */
 .sheet {
@@ -376,7 +363,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .sheet__titles { flex: 1; min-width: 0; }
 .sheet__title { margin: 0; font-size: 21px; line-height: 1.25; }
 .sheet__title:focus, .screen__title:focus { outline: none; }
-.sheet__type { display: flex; align-items: center; gap: 8px; margin: 4px 0 0; color: var(--hint); }
 .sheet__buttons { display: flex; gap: 10px; margin-top: 14px; }
 .sheet__buttons:empty { display: none; }
 
@@ -408,36 +394,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .screen__title { margin: 0; padding: 8px 0; font-size: 19px; }
 .screen__body { flex: 1; overflow-y: auto; padding: 8px 16px 24px; }
 .screen__body > * { max-width: 640px; margin-left: auto; margin-right: auto; }
-.screen__body h3 { margin-top: 18px; margin-bottom: 4px; font-size: 17px; }
 
 /* Своя кнопка «Назад» — только в браузере, в Telegram есть системная. */
 .back-button { min-height: 44px; padding: 0 8px 0 0; border: 0; background: none; color: var(--link); font-weight: 600; }
 .has-telegram-back .back-button { display: none; }
 
-.menu-list { padding: 0; list-style: none; }
 
-.menu-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
 
-.menu-list b { white-space: nowrap; }
+/* Фото меню — во всю ширину экрана. */
+.menu-photo { display: block; width: 100%; margin-top: 12px; border-radius: 12px; }
 
-.veg-badge {
-  margin-left: 6px;
-  padding: 1px 7px;
-  border-radius: 8px;
-  background: var(--veg-bg);
-  color: var(--veg-text);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* ---------- «О проекте», загрузка, сообщения ---------- */
+/* ---------- «О проекте», сообщения ---------- */
 .modal {
   position: fixed;
   inset: 0;
@@ -463,21 +430,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .modal__box h2 { margin-top: 0; }
 .modal__box .button { width: 100%; }
 
-.status-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 1600;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: var(--bg);
-  text-align: center;
-}
-
-.status-screen__title { max-width: 420px; margin: 0; font-size: 18px; font-weight: 600; }
-.status-screen .button { flex: none; min-width: 160px; margin-top: 12px; }
 
 .toast {
   position: fixed;
@@ -502,9 +454,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (min-width: 720px) {
   .topbar { flex-direction: row; align-items: center; }
   .topbar__row { display: contents; }
-  .chips { order: 1; }
-  #open-now { order: 2; }
-  #about-button { order: 3; margin-left: auto; }
+  #about-button { order: 1; margin-left: auto; }
 
   .sheet {
     left: 16px;

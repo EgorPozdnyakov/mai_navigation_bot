@@ -1,4 +1,4 @@
-# Telegram-бот: открывает карту столовых и коворкингов МАИ (Mini App).
+# Telegram-бот: открывает карту столовых МАИ (Mini App).
 #
 # Запуск:
 #   pip install -r bot/requirements.txt
@@ -33,13 +33,13 @@ async def start(message: Message, command: CommandObject):
     if command.args and command.args.startswith("place_") and command.args[6:].isdigit():
         place_id = command.args[6:]
         await message.answer(
-            f"Место № {place_id} на карте МАИ:",
+            f"Столовая № {place_id} на карте МАИ:",
             reply_markup=map_button("📍 Показать на карте", f"{WEBAPP_URL}?place={place_id}"),
         )
         return
     await message.answer(
-        "Привет! Это карта столовых, буфетов, кафе и коворкингов МАИ.\n"
-        "Можно узнать, что открыто сейчас, посмотреть меню и построить маршрут.\n\n"
+        "Привет! Это карта столовых МАИ.\n"
+        "Можно узнать, какие столовые открыты сейчас, где они и сколько стоит обед.\n\n"
         "Это студенческий проект, а не официальный сервис МАИ.",
         reply_markup=map_button("🗺 Открыть карту", WEBAPP_URL),
     )

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Карта столовых и коворкингов кампуса МАИ. Студенческий проект.">
-  <title>Столовые и коворкинги МАИ</title>
+  <meta name="description" content="Карта столовых кампуса МАИ. Студенческий проект.">
+  <title>Столовые МАИ</title>
   <script>
     // Тёмная тема, если она включена в системе. В Telegram тему потом поставит app.js.
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -26,20 +26,11 @@
           <button type="button" data-view="map" aria-pressed="true">Карта</button>
           <button type="button" data-view="list" aria-pressed="false">Список</button>
         </div>
-        <button type="button" class="chip" id="open-now" aria-pressed="false">Открыто сейчас</button>
-      </div>
-      <div class="topbar__row">
-        <div class="chips" role="group" aria-label="Фильтры">
-          <button type="button" class="chip" data-category="food" aria-pressed="false">
-            <span class="dot dot--food"></span>Еда
-          </button>
-          <button type="button" class="chip" data-category="cowork" aria-pressed="false">
-            <span class="dot dot--cowork"></span>Коворкинги
-          </button>
-          <button type="button" class="chip" id="accessible" aria-pressed="false"
-                  aria-label="Доступно для маломобильных" title="Доступно для маломобильных">♿</button>
-        </div>
         <button type="button" class="icon-button icon-button--info" id="about-button" aria-label="О проекте">i</button>
+      </div>
+      <div class="chips" role="group" aria-label="Фильтры">
+        <button type="button" class="chip" id="open-now" aria-pressed="false">Открыто сейчас</button>
+        <button type="button" class="chip" id="accessible" aria-pressed="false">♿ Для маломобильных</button>
       </div>
     </header>
 
@@ -48,14 +39,13 @@
       <section id="map-view" class="map-view">
         <div id="map" class="map"></div>
         <ul class="legend" aria-label="Обозначения">
-          <li><span class="dot dot--food"></span>Места питания</li>
-          <li><span class="dot dot--cowork"></span>Коворкинги</li>
+          <li><span class="dot"></span>Открыто</li>
           <li><span class="dot dot--closed"></span>Закрыто сейчас</li>
         </ul>
-        <p id="debug-badge" class="debug-badge" hidden>Режим разметки: нажмите на карту, чтобы узнать map_x и map_y</p>
+        <p id="debug-badge" class="debug-badge" hidden>Режим разметки: нажмите на карту, чтобы узнать координаты x и y для js/places.js</p>
         <div id="map-error" class="map-error" role="alert" hidden>
           <p><b>Не удалось загрузить карту кампуса.</b></p>
-          <p>Проверьте, что файл media/map.jpg есть на сайте. Пока можно посмотреть места списком.</p>
+          <p>Проверьте, что файл media/map.jpg есть на сайте. Пока можно посмотреть столовые списком.</p>
           <button type="button" class="button" data-view="list">Открыть список</button>
         </div>
       </section>
@@ -85,36 +75,27 @@
     <div id="about" class="modal" hidden>
       <section class="modal__box" role="dialog" aria-modal="true" aria-labelledby="about-title">
         <h2 id="about-title">О проекте</h2>
-        <p>Карта столовых, буфетов, кафе и коворкингов на основной территории МАИ (метро «Сокол»).
-          Нажмите на метку, чтобы узнать, открыто ли место, где оно находится и сколько стоит обед.</p>
+        <p>Карта столовых на основной территории МАИ (метро «Сокол»).
+          Нажмите на метку, чтобы узнать, открыта ли столовая, где она находится и сколько стоит обед.</p>
         <p>Приложение сделали студенты МАИ в рамках дисциплины «Обучение служением».
           Это студенческий проект, а не официальный сервис МАИ.</p>
-        <p>Схема кампуса взята с сайта mai-sten.online. Часы работы, цены и меню собирают студенты —
+        <p>Схема кампуса взята с сайта mai-sten.online. Часы работы и цены собирают студенты —
           они могут меняться, уточняйте на месте.</p>
         <p>Приложение не собирает и никуда не отправляет данные пользователей.</p>
         <button type="button" id="about-close" class="button">Закрыть</button>
       </section>
     </div>
 
-    <!-- Загрузка и ошибка загрузки данных -->
-    <div id="status-screen" class="status-screen" role="status" aria-live="polite">
-      <p id="status-text" class="status-screen__title">Загружаем карту и данные…</p>
-      <p id="status-hint" class="hint"></p>
-      <button type="button" id="retry-button" class="button" hidden>Повторить</button>
-    </div>
-
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </div>
 
   <script>
-    // Если открыть index.html двойным кликом (file://), браузер не даст загрузить модули и CSV.
+    // Если открыть index.html двойным кликом (file://), браузер не даст загрузить модули.
     if (location.protocol === 'file:') {
-      document.getElementById('status-text').textContent =
-        'Откройте приложение через локальный сервер: в папке проекта выполните «python -m http.server» и откройте http://localhost:8000';
+      alert('Откройте приложение через локальный сервер: в папке проекта выполните «python -m http.server» и откройте http://localhost:8000');
     }
   </script>
   <script src="vendor/leaflet/leaflet.js"></script>
-  <script src="vendor/papaparse/papaparse.min.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

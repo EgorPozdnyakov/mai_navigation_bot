@@ -17,16 +17,14 @@
   <h1>Проверки</h1>
   <p id="summary">Выполняем…</p>
   <ul id="results"></ul>
-  <script src="../vendor/papaparse/papaparse.min.js"></script>
   <script type="module">
     import { cases } from './cases.js';
 
-    const read = async (path) => (await fetch('../' + path, { cache: 'no-cache' })).text();
     let failed = 0;
     for (const [name, run] of cases) {
       const item = document.createElement('li');
       try {
-        await run(read);
+        await run();
         item.className = 'ok';
         item.textContent = '✓ ' + name;
       } catch (error) {
