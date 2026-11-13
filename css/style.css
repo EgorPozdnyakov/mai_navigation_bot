@@ -1,134 +1,70 @@
-/* ============================================================================
-   style.css — внешний вид приложения.
+/* style.css — внешний вид. Сначала для телефона, в конце — правки для широких экранов.
+   Все цвета — в переменных. Тёмную тему включает атрибут data-theme="dark"
+   (его ставит index.html по настройке системы или app.js по теме Telegram). */
 
-   Все цвета — в CSS-переменных (--color-…). Их значения меняются:
-   - в браузере — по системной теме (светлая/тёмная, prefers-color-scheme);
-   - в Telegram — js/telegram.js берёт цвета из темы Telegram;
-   - цвета меток (--color-food, --color-cowork) задаются в js/config.js.
-   Вёрстка рассчитана сначала на телефоны (360–430 px), в конце — правки
-   для широких экранов.
-   ============================================================================ */
-
-/* ---------- Цвета: светлая тема (по умолчанию) ---------- */
 :root {
-  color-scheme: light;
-  --color-bg: #ffffff;          /* фон приложения */
-  --color-surface: #ffffff;     /* фон карточек и панелей */
-  --color-surface-2: #f1f3f5;   /* фон второстепенных элементов */
-  --color-text: #1b1f24;
-  --color-hint: #5c6670;        /* второстепенный текст (контраст 5.7:1) */
-  --color-link: #1f6fd1;
-  --color-accent: #1f6fd1;      /* основные кнопки и выбранные фильтры */
-  --color-accent-text: #ffffff;
-  --color-border: rgba(0, 0, 0, 0.14);
-  --color-open: #1e7b34;        /* «Открыто» */
-  --color-closed: #b42318;      /* «Закрыто» */
-  --color-veg-bg: #d3f9d8;
-  --color-veg-text: #1e5b2a;
-  /* Цвета групп — запасные значения; настоящие приходят из js/config.js. */
-  --color-food: #c0262d;
-  --color-cowork: #6d28d9;
-  --color-other: #495057;
-
+  --bg: #ffffff;
+  --surface: #ffffff;      /* фон карточек */
+  --surface-2: #f1f3f5;    /* фон второстепенных элементов */
+  --text: #1b1f24;
+  --hint: #5c6670;         /* серый текст */
+  --link: #1f6fd1;
+  --accent: #1f6fd1;       /* основные кнопки и включённые фильтры */
+  --accent-text: #ffffff;
+  --border: rgba(0, 0, 0, 0.14);
+  --open: #1e7b34;
+  --closed: #b42318;
+  --veg-bg: #d3f9d8;
+  --veg-text: #1e5b2a;
+  --food: #c0262d;         /* метки мест питания */
+  --cowork: #6d28d9;       /* метки коворкингов */
+  --other: #495057;        /* тип в таблице записан с ошибкой */
   --shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
 }
 
-/* ---------- Цвета: тёмная тема ----------
-   Один и тот же набор написан дважды:
-   1) в браузере — если в системе тёмная тема (и Telegram не сказал «светлая»);
-   2) в Telegram — если тема Telegram тёмная (атрибут data-theme ставит telegram.js). */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --color-bg: #16181b;
-    --color-surface: #202327;
-    --color-surface-2: #2b2f34;
-    --color-text: #eceff1;
-    --color-hint: #a7b0b8;
-    --color-link: #7cb0ff;
-    --color-accent: #2f6fd6;
-    --color-accent-text: #ffffff;
-    --color-border: rgba(255, 255, 255, 0.16);
-    --color-open: #5fd07a;
-    --color-closed: #ff8f85;
-    --color-veg-bg: #1f3b26;
-    --color-veg-text: #a6e3b4;
-    --shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
-  }
-}
 :root[data-theme="dark"] {
-  color-scheme: dark;
-  --color-bg: #16181b;
-  --color-surface: #202327;
-  --color-surface-2: #2b2f34;
-  --color-text: #eceff1;
-  --color-hint: #a7b0b8;
-  --color-link: #7cb0ff;
-  --color-accent: #2f6fd6;
-  --color-accent-text: #ffffff;
-  --color-border: rgba(255, 255, 255, 0.16);
-  --color-open: #5fd07a;
-  --color-closed: #ff8f85;
-  --color-veg-bg: #1f3b26;
-  --color-veg-text: #a6e3b4;
+  --bg: #16181b;
+  --surface: #202327;
+  --surface-2: #2b2f34;
+  --text: #eceff1;
+  --hint: #a7b0b8;
+  --link: #7cb0ff;
+  --accent: #2f6fd6;
+  --border: rgba(255, 255, 255, 0.16);
+  --open: #5fd07a;
+  --closed: #ff8f85;
+  --veg-bg: #1f3b26;
+  --veg-text: #a6e3b4;
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
 }
 
 /* ---------- Основа ---------- */
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-html,
 body {
   margin: 0;
-  height: 100%;
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
 }
 
-body {
-  font: 16px/1.45 var(--font);
-  color: var(--color-text);
-  background: var(--color-bg);
-  -webkit-text-size-adjust: 100%;
-}
+button { font: inherit; color: inherit; cursor: pointer; }
 
-/* Атрибут hidden должен прятать элемент, даже если ему задан display. */
-[hidden] {
-  display: none !important;
-}
-
-/* Текст только для программ чтения с экрана: на экране не виден. */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-/* Рамка фокуса для управления с клавиатуры. */
-:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-button {
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-/* Приложение занимает ровно видимую часть экрана: сверху панель,
-   ниже — карта или список. position: fixed + inset: 0 надёжнее, чем 100vh
-   (в мобильных браузерах и Telegram 100vh бывает больше экрана). */
+/* position: fixed надёжнее, чем 100vh: в Telegram 100vh бывает больше экрана. */
 .app {
   position: fixed;
   inset: 0;
   display: flex;
   flex-direction: column;
 }
+
+.hint { margin: 8px 0 0; color: var(--hint); font-size: 14px; }
+.message { margin: 24px auto; max-width: 480px; text-align: center; color: var(--hint); }
+.no-data { color: var(--hint); font-style: italic; }
 
 /* ---------- Кнопки ---------- */
 .button {
@@ -137,214 +73,101 @@ button {
   padding: 0 16px;
   border: 0;
   border-radius: 12px;
-  background: var(--color-accent);
-  color: var(--color-accent-text);
+  background: var(--accent);
+  color: var(--accent-text);
   font-weight: 600;
 }
 
-.button--secondary {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
+.button--secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+.button--small { min-height: 36px; margin: 6px 0; font-size: 14px; }
 
-.button--small {
-  flex: none;
-  min-height: 36px;
-  font-size: 14px;
-}
-
-/* Круглая кнопка-иконка (×, i). 44×44 — удобно попасть пальцем. */
+/* Круглая кнопка 44×44 (×, i) — удобно попасть пальцем. */
 .icon-button {
   flex: none;
   width: 44px;
   height: 44px;
   border: 0;
   border-radius: 50%;
-  background: var(--color-surface-2);
-  color: var(--color-text);
+  background: var(--surface-2);
   font-size: 24px;
   line-height: 1;
 }
 
-.icon-button--info {
-  font-family: Georgia, "Times New Roman", serif;
-  font-style: italic;
-  font-weight: 700;
-  font-size: 20px;
-}
+.icon-button--info { font: italic 700 20px Georgia, serif; }
 
 /* ---------- Верхняя панель ---------- */
 .topbar {
-  flex: none;
   z-index: 1100;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 8px 12px;
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 
-.topbar__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
+.topbar__row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 
-/* Переключатель «Карта / Список» */
-.segmented {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 999px;
-  background: var(--color-surface-2);
-}
+.segmented { display: flex; padding: 3px; border-radius: 999px; background: var(--surface-2); }
 
 .segmented button {
   min-height: 38px;
   padding: 0 12px;
   border: 0;
   border-radius: 999px;
-  background: transparent;
+  background: none;
   font-weight: 600;
 }
 
-.segmented button[aria-pressed="true"] {
-  background: var(--color-accent);
-  color: var(--color-accent-text);
-}
+.segmented button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
 
-/* Фильтры-«чипсы». На экранах от 360 px всё помещается; на совсем узких
-   их можно прокрутить вбок. */
-.chips {
-  display: flex;
-  gap: 6px;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.chips::-webkit-scrollbar {
-  display: none;
-}
+.chips { display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 
 .chip {
   flex: none;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
   min-height: 40px;
   padding: 0 11px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: var(--color-surface);
+  background: var(--surface);
   white-space: nowrap;
   font-size: 15px;
 }
 
-/* Включённый фильтр: цвет + галочка (чтобы было понятно не только по цвету). */
-.chip[aria-pressed="true"] {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-accent-text);
-}
+/* Включённый фильтр — цвет и галочка (чтобы было понятно не только по цвету). */
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.chip[aria-pressed="true"]::before { content: "✓"; font-weight: 700; }
 
-.chip[aria-pressed="true"]::before {
-  content: "✓";
-  font-weight: 700;
-}
-
-
-.chip__dot {
-  width: 10px;
-  height: 10px;
+/* Цветная точка в фильтрах и легенде. */
+.dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ffffff;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
-.chip__dot--food {
-  background: var(--color-food);
-}
+.dot--food { background: var(--food); }
+.dot--cowork { background: var(--cowork); }
+.dot--closed { background: var(--food); opacity: 0.8; filter: grayscale(0.75); }
 
-.chip__dot--cowork {
-  background: var(--color-cowork);
-}
+/* ---------- Карта ---------- */
+.main { position: relative; flex: 1; min-height: 0; }
+.map-view, .map { position: absolute; inset: 0; }
+.map-view.is-hidden { visibility: hidden; }
 
-/* ---------- Основная область ---------- */
-.main {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-}
+.leaflet-container { background: var(--surface-2); font: inherit; }
+.leaflet-bar a, .leaflet-bar a:hover { background: var(--surface); color: var(--text); }
+.leaflet-container .leaflet-control-attribution { background: var(--surface); color: var(--hint); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); }
 
-.map-view,
-.map {
-  position: absolute;
-  inset: 0;
-}
-
-/* Когда открыт список, карту прячем, но она сохраняет размеры (см. ui.js). */
-.map-view.is-hidden {
-  visibility: hidden;
-}
-
-.message {
-  margin: 24px auto;
-  max-width: 480px;
-  text-align: center;
-  color: var(--color-hint);
-}
-
-.hint {
-  margin: 12px 0 0;
-  color: var(--color-hint);
-  font-size: 14px;
-}
-
-/* «нет данных» — серым курсивом, чтобы отличалось от настоящих значений. */
-.no-data {
-  color: var(--color-hint);
-  font-style: italic;
-}
-
-/* ---------- Leaflet: подгоняем под наши цвета ---------- */
-.leaflet-container {
-  background: var(--color-surface-2);
-  font: inherit;
-}
-
-.leaflet-bar a,
-.leaflet-bar a:hover {
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  background: var(--color-surface);
-  color: var(--color-text);
-  border-bottom-color: var(--color-border);
-}
-
-.leaflet-container .leaflet-control-attribution {
-  background: var(--color-surface);
-  color: var(--color-hint);
-  font-size: 11px;
-  opacity: 0.9;
-}
-
-.leaflet-popup-content-wrapper,
-.leaflet-popup-tip {
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-
-/* ---------- Метки ----------
-   .marker — невидимая область 44×44 px (в неё легко попасть пальцем),
-   .marker__dot — цветной кружок с номером внутри неё. */
-.marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Метка: невидимая область 44×44, внутри — цветной кружок с номером. */
+.marker { display: flex; align-items: center; justify-content: center; }
+.marker:focus-visible { outline: none; }
 
 .marker__dot {
   display: flex;
@@ -354,97 +177,41 @@ button {
   height: 30px;
   border: 2.5px solid #ffffff;
   border-radius: 50%;
-  background: var(--color-food);
+  background: var(--food);
   color: #ffffff;
   font-size: 15px;
   font-weight: 700;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s;
 }
 
-.marker--cowork .marker__dot {
-  background: var(--color-cowork);
-}
-
-.marker--other .marker__dot {
-  background: var(--color-other);
-}
-
-/* Закрыто сейчас — приглушённая метка: почти серая и чуть прозрачная.
-   Не делаем прозрачнее: белый номер на светлой карте перестанет читаться. */
-.marker.is-closed .marker__dot {
-  opacity: 0.8;
-  filter: grayscale(0.75);
-}
-
-/* Выбранная метка — крупнее и с обводкой. */
+.marker--cowork .marker__dot { background: var(--cowork); }
+.marker--other .marker__dot { background: var(--other); }
+.marker.is-closed .marker__dot { opacity: 0.8; filter: grayscale(0.75); }
 .marker.is-selected .marker__dot {
   transform: scale(1.35);
   opacity: 1;
   filter: none;
-  box-shadow: 0 0 0 3px var(--color-accent), 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 3px var(--accent), 0 2px 8px rgba(0, 0, 0, 0.5);
 }
+.marker:focus-visible .marker__dot { box-shadow: 0 0 0 3px #000000, 0 0 0 6px #ffffff; }
 
-.marker:focus-visible {
-  outline: none;
-}
-
-.marker:focus-visible .marker__dot {
-  box-shadow: 0 0 0 3px #000000, 0 0 0 6px #ffffff;
-}
-
-/* ---------- Легенда ----------
-   Слева внизу: там она не закрывает карту (при открытии видна вся карта,
-   и снизу остаётся пустое поле), а при открытой карточке её прячет карточка. */
 .legend {
   position: absolute;
-  bottom: 8px;
   left: 8px;
+  bottom: 8px;
   z-index: 900;
+  margin: 0;
   padding: 6px 10px;
   border-radius: 10px;
-  background: var(--color-surface);
+  background: var(--surface);
   box-shadow: var(--shadow);
   font-size: 13px;
-}
-
-.legend ul {
-  display: grid;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
   list-style: none;
 }
 
-.legend li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+.legend li { display: flex; align-items: center; gap: 6px; }
 
-.legend__dot {
-  width: 12px;
-  height: 12px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
-}
-
-.legend__dot--food {
-  background: var(--color-food);
-}
-
-.legend__dot--cowork {
-  background: var(--color-cowork);
-}
-
-.legend__dot--closed {
-  background: var(--color-food);
-  opacity: 0.8;
-  filter: grayscale(0.75);
-}
-
-/* ---------- Режим разметки ---------- */
 .debug-badge {
   position: absolute;
   top: 8px;
@@ -457,22 +224,8 @@ button {
   background: #fff3bf;
   color: #4a3b00;
   font-size: 13px;
-  box-shadow: var(--shadow);
 }
 
-.debug-popup {
-  display: grid;
-  gap: 6px;
-  max-width: 200px;
-  font-size: 14px;
-}
-
-.debug-tooltip {
-  padding: 1px 5px;
-  font-size: 11px;
-}
-
-/* ---------- Ошибка загрузки карты ---------- */
 .map-error {
   position: absolute;
   inset: 0;
@@ -481,25 +234,12 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   padding: 24px;
-  background: var(--color-surface-2);
+  background: var(--surface-2);
   text-align: center;
 }
 
-.map-error p {
-  max-width: 420px;
-  margin: 0 0 8px;
-}
-
-.map-error__title {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.map-error .button {
-  flex: none;
-}
+.map-error .button { flex: none; }
 
 /* ---------- Список ---------- */
 .list-view {
@@ -508,17 +248,23 @@ button {
   z-index: 1000;
   overflow-y: auto;
   padding: 12px 12px 24px;
-  background: var(--color-bg);
+  background: var(--bg);
 }
 
-.places-list {
-  display: grid;
-  gap: 8px;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
+.search, .places-list { display: block; width: 100%; max-width: 720px; margin: 0 auto; }
+
+.search {
+  min-height: 44px;
+  margin-bottom: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
 }
+
+.places-list { display: grid; gap: 8px; padding: 0; list-style: none; }
 
 .list-item {
   display: flex;
@@ -526,96 +272,43 @@ button {
   gap: 12px;
   width: 100%;
   padding: 14px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: 14px;
-  background: var(--color-surface);
+  background: var(--surface);
   text-align: left;
 }
 
-.list-item__text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+.list-item__text { display: flex; flex-direction: column; min-width: 0; }
+.list-item__name { font-size: 18px; font-weight: 700; }
+.list-item .hint { margin: 0; }
 
-.list-item__name {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.list-item__where {
-  color: var(--color-hint);
-  font-size: 15px;
-}
-
-.list-item .status {
-  margin-top: 2px;
-  font-size: 15px;
-}
-
-.list-item .badge {
-  min-width: 30px;
-  height: 30px;
-  border-radius: 15px;
-  font-size: 15px;
-}
-
-/* Номер места в цветном кружке (в карточке и в списке). */
+/* Номер места в цветном кружке. */
 .badge {
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 24px;
+  min-width: 26px;
+  height: 26px;
   padding: 0 6px;
-  border-radius: 12px;
-  background: var(--color-food);
+  border-radius: 13px;
+  background: var(--food);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
-.badge--cowork {
-  background: var(--color-cowork);
-}
+.badge--cowork { background: var(--cowork); }
+.badge--other { background: var(--other); }
 
-.badge--other {
-  background: var(--color-other);
-}
+/* Статус с точкой. Цвет — не единственный признак: рядом всегда текст. */
+.status { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font-weight: 600; }
+.status::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.status--open { color: var(--open); }
+.status--closed { color: var(--closed); }
+.status--unknown { color: var(--hint); }
 
-/* Статус с цветной точкой. Цвет — не единственный признак: рядом всегда текст. */
-.status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 6px 0 0;
-  font-weight: 600;
-}
-
-.status::before {
-  content: "";
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.status--open {
-  color: var(--color-open);
-}
-
-.status--closed {
-  color: var(--color-closed);
-}
-
-.status--unknown {
-  color: var(--color-hint);
-}
-
-/* ---------- Карточка места (bottom sheet) ---------- */
+/* ---------- Карточка места (выезжает снизу) ---------- */
 .sheet {
   position: absolute;
   left: 0;
@@ -624,15 +317,15 @@ button {
   z-index: 1200;
   max-height: 62%;
   overflow-y: auto;
-  overscroll-behavior: contain; /* прокрутка карточки не двигает страницу */
+  overscroll-behavior: contain;
   padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
   border-radius: 18px 18px 0 0;
-  background: var(--color-surface);
+  background: var(--surface);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.22);
-  animation: sheet-in 0.22s ease-out;
+  animation: sheet-in 0.2s ease-out;
 }
 
-/* Полоска сверху — привычный знак «это выдвижная панель». */
+/* Полоска сверху — привычный знак выдвижной панели. */
 .sheet::before {
   content: "";
   display: block;
@@ -640,21 +333,13 @@ button {
   height: 4px;
   margin: 0 auto 10px;
   border-radius: 2px;
-  background: var(--color-border);
+  background: var(--border);
 }
 
 @keyframes sheet-in {
-  from {
-    transform: translateY(40px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
+  from { transform: translateY(40px); opacity: 0; }
 }
 
-/* Фото: горизонтальная прокрутка с «прилипанием» к началу фото. */
 .photos {
   display: flex;
   gap: 8px;
@@ -671,94 +356,35 @@ button {
   height: 140px;
   border-radius: 12px;
   object-fit: cover;
-  background: var(--color-surface-2);
+  background: var(--surface-2);
   scroll-snap-align: start;
 }
 
-.photos--single .photos__item {
-  width: 100%;
-  max-width: none;
-}
+.photos__item:only-child { width: 100%; max-width: none; }
 
 .photos--empty {
-  align-items: center;
   justify-content: center;
-  gap: 8px;
+  align-items: center;
   height: 84px;
   margin: 0 0 12px;
-  padding: 0;
   border-radius: 12px;
-  background: var(--color-surface-2);
-  color: var(--color-hint);
+  background: var(--surface-2);
+  color: var(--hint);
 }
 
-.photos__icon {
-  font-size: 22px;
-  opacity: 0.7;
-}
+.sheet__header { display: flex; align-items: flex-start; gap: 8px; }
+.sheet__titles { flex: 1; min-width: 0; }
+.sheet__title { margin: 0; font-size: 21px; line-height: 1.25; }
+.sheet__title:focus, .screen__title:focus { outline: none; }
+.sheet__type { display: flex; align-items: center; gap: 8px; margin: 4px 0 0; color: var(--hint); }
+.sheet__buttons { display: flex; gap: 10px; margin-top: 14px; }
+.sheet__buttons:empty { display: none; }
 
-.sheet__header {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.sheet__titles {
-  flex: 1;
-  min-width: 0;
-}
-
-.sheet__title {
-  margin: 0;
-  font-size: 21px;
-  line-height: 1.25;
-}
-
-.sheet__title:focus {
-  outline: none; /* фокус ставит программа, рамка тут не нужна */
-}
-
-.sheet__type {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0 0;
-  color: var(--color-hint);
-}
-
-.sheet__buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-/* Сведения: «название — значение» в две колонки. */
-.details {
-  display: grid;
-  gap: 10px;
-  margin: 16px 0 0;
-}
-
-.details__row {
-  display: grid;
-  grid-template-columns: minmax(96px, 36%) 1fr;
-  gap: 10px;
-}
-
-.details dt {
-  color: var(--color-hint);
-  font-size: 14px;
-}
-
-.details dd {
-  margin: 0;
-}
-
-.hours {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+.details { display: grid; gap: 10px; margin: 16px 0 0; }
+.details__row { display: grid; grid-template-columns: minmax(96px, 36%) 1fr; gap: 10px; }
+.details dt { color: var(--hint); font-size: 14px; }
+.details dd { margin: 0; }
+.hours { margin: 0; padding: 0; list-style: none; }
 
 /* ---------- Экран меню ---------- */
 .screen {
@@ -767,94 +393,51 @@ button {
   z-index: 1300;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
+  background: var(--bg);
 }
 
 .screen__header {
-  flex: none;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 8px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
 }
 
-.screen__title {
-  margin: 0;
-  padding: 8px 0;
-  font-size: 19px;
-}
+.screen__title { margin: 0; padding: 8px 0; font-size: 19px; }
+.screen__body { flex: 1; overflow-y: auto; padding: 8px 16px 24px; }
+.screen__body > * { max-width: 640px; margin-left: auto; margin-right: auto; }
+.screen__body h3 { margin-top: 18px; margin-bottom: 4px; font-size: 17px; }
 
-.screen__title:focus {
-  outline: none;
-}
+/* Своя кнопка «Назад» — только в браузере, в Telegram есть системная. */
+.back-button { min-height: 44px; padding: 0 8px 0 0; border: 0; background: none; color: var(--link); font-weight: 600; }
+.has-telegram-back .back-button { display: none; }
 
-.screen__body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 16px 24px;
-}
+.menu-list { padding: 0; list-style: none; }
 
-.screen__body > * {
-  max-width: 640px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Своя кнопка «Назад» — только в браузере. В Telegram есть системная. */
-.back-button {
-  flex: none;
-  min-height: 44px;
-  padding: 0 8px 0 0;
-  border: 0;
-  background: none;
-  color: var(--color-link);
-  font-weight: 600;
-}
-
-.has-telegram-back .back-button {
-  display: none;
-}
-
-.menu-section h3 {
-  margin: 18px 0 4px;
-  font-size: 17px;
-}
-
-.menu-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.menu-list__item {
+.menu-list li {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
 }
 
-.menu-list__price {
-  font-weight: 600;
-  white-space: nowrap;
-}
+.menu-list b { white-space: nowrap; }
 
 .veg-badge {
-  display: inline-block;
-  margin-left: 8px;
+  margin-left: 6px;
   padding: 1px 7px;
   border-radius: 8px;
-  background: var(--color-veg-bg);
-  color: var(--color-veg-text);
+  background: var(--veg-bg);
+  color: var(--veg-text);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  vertical-align: 1px;
 }
 
-/* ---------- Окно «О проекте» ---------- */
+/* ---------- «О проекте», загрузка, сообщения ---------- */
 .modal {
   position: fixed;
   inset: 0;
@@ -873,20 +456,13 @@ button {
   overflow-y: auto;
   padding: 20px;
   border-radius: 18px;
-  background: var(--color-surface);
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
-.modal__box h2 {
-  margin: 0 0 8px;
-}
+.modal__box h2 { margin-top: 0; }
+.modal__box .button { width: 100%; }
 
-.modal__box .button {
-  width: 100%;
-  margin-top: 8px;
-}
-
-/* ---------- Загрузка и ошибка данных ---------- */
 .status-screen {
   position: fixed;
   inset: 0;
@@ -895,33 +471,14 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   padding: 24px;
-  background: var(--color-bg);
+  background: var(--bg);
   text-align: center;
 }
 
-.status-screen p {
-  max-width: 420px;
-  margin: 0;
-}
+.status-screen__title { max-width: 420px; margin: 0; font-size: 18px; font-weight: 600; }
+.status-screen .button { flex: none; min-width: 160px; margin-top: 12px; }
 
-.status-screen__title {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.status-screen__hint {
-  color: var(--color-hint);
-}
-
-.status-screen .button {
-  flex: none;
-  margin-top: 12px;
-  min-width: 160px;
-}
-
-/* ---------- Короткие сообщения ---------- */
 .toast {
   position: fixed;
   left: 50%;
@@ -936,45 +493,19 @@ button {
   transform: translateX(-50%);
 }
 
-/* ---------- Меньше движения, если человек так настроил систему ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .sheet {
-    animation: none;
-  }
-
-  .marker__dot {
-    transition: none;
-  }
+  .sheet { animation: none; }
+  .marker__dot { transition: none; }
 }
 
-/* ---------- Широкие экраны (планшет, компьютер) ---------- */
+/* ---------- Широкие экраны: панель в одну строку, карточка слева ---------- */
 @media (min-width: 720px) {
-  .topbar {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+  .topbar { flex-direction: row; align-items: center; }
+  .topbar__row { display: contents; }
+  .chips { order: 1; }
+  #open-now { order: 2; }
+  #about-button { order: 3; margin-left: auto; }
 
-  /* На широком экране оба ряда панели — в одну строку:
-     [Карта|Список] [Все][Еда][Коворкинги] [Открыто сейчас] ……… [i] */
-  .topbar__row {
-    display: contents;
-  }
-
-  .chips {
-    order: 1;
-  }
-
-  #chip-open-now {
-    order: 2;
-  }
-
-  #about-button {
-    order: 3;
-    margin-left: auto;
-  }
-
-  /* Карточка — плавающая панель слева внизу, а не во всю ширину. */
   .sheet {
     left: 16px;
     right: auto;
@@ -984,7 +515,5 @@ button {
     border-radius: 18px;
   }
 
-  .sheet::before {
-    display: none;
-  }
+  .sheet::before { display: none; }
 }

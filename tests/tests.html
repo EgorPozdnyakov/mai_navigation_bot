@@ -4,30 +4,42 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Тесты — карта МАИ</title>
-  <!--
-    Те же проверки, что и в Node.js (tests/node.test.js), но в браузере —
-    для тех, у кого не установлен Node.js.
-    Открывать через локальный сервер (см. README):
-      python -m http.server   → http://localhost:8000/tests/tests.html
-  -->
+  <!-- Те же проверки, что и «node --test», но в браузере.
+       Открывать через сервер: python -m http.server → http://localhost:8000/tests/tests.html -->
   <style>
-    body { font: 16px/1.5 system-ui, sans-serif; margin: 16px; color: #1b1f24; background: #fff; }
-    h1 { font-size: 22px; }
-    .summary { font-weight: 700; padding: 8px 12px; border-radius: 8px; }
-    .summary.ok { background: #d3f9d8; }
-    .summary.fail { background: #ffe3e3; }
-    li { margin: 4px 0; }
-    .pass::marker { content: '✓ '; color: #1e7b34; }
-    .fail-item::marker { content: '✗ '; color: #b42318; }
-    pre { white-space: pre-wrap; background: #f1f3f5; padding: 8px; border-radius: 6px; }
+    body { font: 16px/1.5 system-ui, sans-serif; margin: 16px; }
+    .ok { color: #1e7b34; }
+    .fail { color: #b42318; }
+    pre { white-space: pre-wrap; background: #f1f3f5; padding: 8px; }
   </style>
 </head>
 <body>
-  <h1>Проверки чистых функций</h1>
-  <p id="summary" class="summary">Выполняем проверки…</p>
+  <h1>Проверки</h1>
+  <p id="summary">Выполняем…</p>
   <ul id="results"></ul>
-  <!-- Papa Parse нужен для проверок разбора CSV. -->
   <script src="../vendor/papaparse/papaparse.min.js"></script>
-  <script type="module" src="browser-runner.js"></script>
+  <script type="module">
+    import { cases } from './cases.js';
+
+    const read = async (path) => (await fetch('../' + path, { cache: 'no-cache' })).text();
+    let failed = 0;
+    for (const [name, run] of cases) {
+      const item = document.createElement('li');
+      try {
+        await run(read);
+        item.className = 'ok';
+        item.textContent = '✓ ' + name;
+      } catch (error) {
+        failed++;
+        item.className = 'fail';
+        item.innerHTML = '✗ ' + name + '<pre></pre>';
+        item.querySelector('pre').textContent = error.message;
+      }
+      document.getElementById('results').append(item);
+    }
+    const summary = document.getElementById('summary');
+    summary.textContent = failed === 0 ? `Все проверки прошли: ${cases.length}` : `Не прошли: ${failed} из ${cases.length}`;
+    summary.className = failed === 0 ? 'ok' : 'fail';
+  </script>
 </body>
 </html>

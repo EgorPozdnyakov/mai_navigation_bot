@@ -1,7 +1,7 @@
 {
   "name": "mai-navigation-webapp",
   "private": true,
-  "description": "Этот файл нужен только Node.js для тестов: \"type\": \"module\" говорит, что .js-файлы — ES-модули. npm install делать не нужно, зависимостей нет.",
+  "description": "Нужен только для тестов в Node.js (node --test). npm install не нужен.",
   "type": "module",
   "scripts": {
     "test": "node --test"
