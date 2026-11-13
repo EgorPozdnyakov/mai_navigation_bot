@@ -227,21 +227,19 @@ export const cases = [
     eq(placeIdFromParam(undefined), null);
   }],
 
-  ['Демо-данные data/objects.csv', async (read) => {
+  ['Данные data/objects.csv: 9 столовых на значках общепита', async (read) => {
     const csv = parseCsv(await read('data/objects.csv'));
     eq(csv.errors, []);
     eq(OBJECT_COLUMNS.filter((column) => !csv.columns.includes(column)), [], 'все колонки на месте');
     const result = parsePlaces(csv.rows);
-    eq(result.places.map((place) => place.id), [1, 2, 3, 4]);
-    eq(result.hiddenIds, [5]);
-    eq(result.warnings.length, 1, 'одна специальная ошибка — часы буфета');
-    eq(result.warnings[0].includes('id=2') && result.warnings[0].includes('hours_weekdays'), true);
+    eq(result.places.map((place) => place.id), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    eq(result.warnings, []);
+    eq(result.places.every((place) => place.mapX !== null), true, 'у всех мест есть метка');
   }],
 
-  ['Демо-данные data/menu.csv', async (read) => {
+  ['Данные data/menu.csv читаются без ошибок', async (read) => {
     const csv = parseCsv(await read('data/menu.csv'));
-    const result = parseMenu(csv.rows);
-    eq(result.warnings, []);
-    eq(result.menu[1].length, 10);
+    eq(csv.errors, []);
+    eq(parseMenu(csv.rows).warnings, []);
   }],
 ];

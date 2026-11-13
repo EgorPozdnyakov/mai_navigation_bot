@@ -218,10 +218,10 @@ function cardHtml(place) {
   }
   if (place.group === 'cowork') {
     html += row('Мест', place.seats);
-    html += row('Розетки', place.sockets);
     html += row('Wi‑Fi', yesNo(place.wifi));
     html += row('Обстановка', place.noise);
   }
+  html += row('Розетки', place.sockets);
   html += row('Доступность для маломобильных', accessText(place));
   html += '</dl>';
 
