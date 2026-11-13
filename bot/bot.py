@@ -8,6 +8,7 @@
 # Ссылка t.me/StolovayaMAI_bot?start=place_3 откроет сразу карточку места № 3 (удобно для QR-кодов).
 
 import asyncio
+import logging
 import os
 
 from aiogram import Bot, Dispatcher
@@ -54,10 +55,12 @@ async def help_command(message: Message):
 
 
 async def main():
+    # Печатать в терминал, что делает бот: запуск, входящие сообщения, ошибки.
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     bot = Bot(BOT_TOKEN)
     # Кнопка «Карта» слева от поля ввода во всех чатах с ботом.
     await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Карта", web_app=WebAppInfo(url=WEBAPP_URL)))
-    print("Бот запущен. Остановить — Ctrl+C")
+    print("Бот запущен и ждёт сообщений. Пока это окно открыто, бот отвечает. Остановить — Ctrl+C", flush=True)
     await dp.start_polling(bot)
 
 
