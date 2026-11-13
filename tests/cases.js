@@ -2,7 +2,7 @@
 // Запуск: «node --test» в папке проекта или страница tests/tests.html в браузере.
 // Каждая проверка — [название, функция].
 
-import { toMinutes, formatTime, getMoscowTime, getStatus } from '../js/hours.js';
+import { toMinutes, formatTime, getMoscowTime, getStatus, getQueue } from '../js/hours.js';
 import { PLACES } from '../js/places.js';
 
 // Сравнение через JSON: подходит и для чисел, и для объектов.
@@ -46,6 +46,23 @@ export const cases = [
     eq(status(6, '12:00'), 'Закрыто, откроется в понедельник в 09:00');
     eq(status(0, '12:00'), 'Закрыто, откроется завтра в 09:00');
     eq(getStatus(usual, { weekday: 6, minutes: 600 }).open, false);
+  }],
+
+  ['Очередь: одна и та же в течение часа, в обед чаще большая', () => {
+    const place = { id: 3 };
+    eq(getQueue(place, new Date('2026-11-09T10:05:00Z')), getQueue(place, new Date('2026-11-09T10:55:00Z')), 'внутри часа не меняется');
+    const lunch = [];
+    const evening = [];
+    for (let day = 1; day <= 28; day++) {
+      for (let id = 1; id <= 10; id++) {
+        const d = String(day).padStart(2, '0');
+        lunch.push(getQueue({ id }, new Date(`2026-02-${d}T09:30:00Z`)));   // 12:30 по Москве
+        evening.push(getQueue({ id }, new Date(`2026-02-${d}T14:30:00Z`))); // 17:30 по Москве
+      }
+    }
+    const reds = (list) => list.filter((q) => q === 'red').length;
+    eq(lunch.every((q) => ['green', 'yellow', 'red'].includes(q)), true);
+    eq(reds(lunch) > reds(evening), true, `в обед красных ${reds(lunch)}, вечером ${reds(evening)}`);
   }],
 
   ['Данные в js/places.js заполнены правильно', () => {

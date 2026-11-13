@@ -109,8 +109,9 @@ export function addMarkers(places, debug, onClick) {
   }
 }
 
-// Показывает или прячет метку и меняет её вид: закрыто — бледная, выбрана — крупнее.
-export function updateMarker(id, show, closed, selected, label) {
+// Показывает или прячет метку и меняет её вид: цвет — очередь (green, yellow, red),
+// закрыто — серая, выбрана — крупнее.
+export function updateMarker(id, show, closed, queue, selected, label) {
   const marker = markers[id];
   if (!marker) return;
   if (show) marker.addTo(map);
@@ -119,6 +120,9 @@ export function updateMarker(id, show, closed, selected, label) {
   const element = marker.getElement();
   if (!element) return;
   element.classList.toggle('is-closed', closed);
+  element.classList.toggle('queue-green', queue === 'green');
+  element.classList.toggle('queue-yellow', queue === 'yellow');
+  element.classList.toggle('queue-red', queue === 'red');
   element.classList.toggle('is-selected', selected);
   element.setAttribute('aria-label', label);
   marker.setZIndexOffset(selected ? 1000 : 0);

@@ -1,13 +1,13 @@
 // app.js — главный файл: фильтры, список, карточка столовой, меню и Telegram.
 
 import { PLACES } from './places.js';
-import { getMoscowTime, getStatus, formatTime, toMinutes } from './hours.js';
+import { getMoscowTime, getStatus, getQueue, QUEUE_TEXT, formatTime, toMinutes } from './hours.js';
 import * as map from './map.js';
 
 const PHOTOS_FOLDER = 'media/photos/';
 
 // ---------- Состояние приложения ----------
-const statuses = {};        // id столовой → { open, text }, пересчитываем раз в минуту
+const statuses = {};        // id столовой → { open, text, queue }, пересчитываем раз в минуту
 let view = 'map';           // 'map' или 'list'
 let openNowOnly = false;    // фильтр «Открыто сейчас»
 let accessibleOnly = false; // фильтр ♿
@@ -45,6 +45,17 @@ function showToast(text) {
   toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3000);
 }
 
+// Текст про очередь. У закрытой столовой очереди нет.
+function queueText(status) {
+  if (!status.open) return '';
+  return QUEUE_TEXT[status.queue];
+}
+
+// Строка «● Большая очередь» с цветной точкой.
+function queueHtml(status, id) {
+  return `<p id="${id}" class="queue queue--${status.open ? status.queue : 'none'}">${queueText(status)}</p>`;
+}
+
 // ---------- Фильтры, метки и список ----------
 
 function matchesFilters(place) {
@@ -56,7 +67,10 @@ function matchesFilters(place) {
 // Пересчитать «открыто / закрыто» по московскому времени.
 function updateStatuses() {
   const now = getMoscowTime();
-  for (const place of PLACES) statuses[place.id] = getStatus(place, now);
+  for (const place of PLACES) {
+    statuses[place.id] = getStatus(place, now);
+    statuses[place.id].queue = getQueue(place); // очередь меняется раз в час
+  }
   render();
 }
 
@@ -74,7 +88,8 @@ function render() {
     const selected = place.id === selectedId;
     // Выбранную столовую показываем всегда, иначе метка пропала бы под карточкой.
     const show = matchesFilters(place) || selected;
-    map.updateMarker(place.id, show, !status.open, selected, `${place.id}. ${place.name}. ${status.text}`);
+    const label = `${place.id}. ${place.name}. ${status.text}. ${queueText(status)}`.replace(/\. $/, '');
+    map.updateMarker(place.id, show, !status.open, status.queue, selected, label);
   }
 
   renderList();
@@ -83,6 +98,7 @@ function render() {
     const status = statuses[selectedId];
     $('sheet-status').className = status.open ? 'status status--open' : 'status status--closed';
     $('sheet-status').textContent = status.text;
+    $('sheet-queue').outerHTML = queueHtml(status, 'sheet-queue');
   }
 }
 
@@ -100,6 +116,7 @@ function renderList() {
             <span class="list-item__name">${place.name}</span>
             <span class="hint">${place.where}</span>
             <span class="status ${status.open ? 'status--open' : 'status--closed'}">${status.text}</span>
+            ${queueHtml(status, '')}
           </span>
         </button>
       </li>`;
@@ -172,6 +189,7 @@ function cardHtml(place) {
       <div class="sheet__titles">
         <h2 id="sheet-title" class="sheet__title" tabindex="-1">${place.name}</h2>
         <p id="sheet-status" class="status ${status.open ? 'status--open' : 'status--closed'}">${status.text}</p>
+        ${queueHtml(status, 'sheet-queue')}
       </div>
       <button type="button" id="sheet-close" class="icon-button" aria-label="Закрыть карточку">×</button>
     </div>

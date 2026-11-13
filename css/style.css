@@ -8,6 +8,9 @@
   --surface-2: #f1f3f5;    /* фон второстепенных элементов */
   --text: #1b1f24;
   --marker: #c0262d;       /* метки столовых */
+  --queue-green: #2b8a3e;  /* очереди нет */
+  --queue-yellow: #f2b705; /* небольшая очередь */
+  --queue-red: #c92a2a;    /* большая очередь */
   --hint: #5c6670;         /* серый текст */
   --link: #1f6fd1;
   --accent: #1f6fd1;       /* основные кнопки и включённые фильтры */
@@ -144,8 +147,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
-.dot { background: var(--marker); }
-.dot--closed { opacity: 0.8; filter: grayscale(0.75); }
+.dot--green { background: var(--queue-green); }
+.dot--yellow { background: var(--queue-yellow); }
+.dot--red { background: var(--queue-red); }
+.dot--closed { background: #868e96; }
 
 /* ---------- Карта ---------- */
 .main { position: relative; flex: 1; min-height: 0; }
@@ -177,7 +182,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
   transition: transform 0.15s;
 }
 
-.marker.is-closed .marker__dot { opacity: 0.8; filter: grayscale(0.75); }
+.marker.queue-green .marker__dot { background: var(--queue-green); }
+.marker.queue-yellow .marker__dot { background: var(--queue-yellow); color: #1b1f24; }
+.marker.queue-red .marker__dot { background: var(--queue-red); }
+.marker.is-closed .marker__dot { background: #868e96; color: #ffffff; }
 .marker.is-selected .marker__dot {
   transform: scale(1.35);
   opacity: 1;
@@ -294,6 +302,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .status::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
 .status--open { color: var(--open); }
 .status--closed { color: var(--closed); }
+
+/* Очередь: точка нужного цвета и текст. */
+.queue { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 15px; }
+.queue::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; }
+.queue--green::before { background: var(--queue-green); }
+.queue--yellow::before { background: var(--queue-yellow); }
+.queue--red::before { background: var(--queue-red); }
+.queue--none { display: none; }
 
 /* ---------- Карточка места (выезжает снизу) ---------- */
 .sheet {

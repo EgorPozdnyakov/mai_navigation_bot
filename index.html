@@ -39,8 +39,10 @@
       <section id="map-view" class="map-view">
         <div id="map" class="map"></div>
         <ul class="legend" aria-label="Обозначения">
-          <li><span class="dot"></span>Открыто</li>
-          <li><span class="dot dot--closed"></span>Закрыто сейчас</li>
+          <li><span class="dot dot--green"></span>Очереди нет</li>
+          <li><span class="dot dot--yellow"></span>Небольшая очередь</li>
+          <li><span class="dot dot--red"></span>Большая очередь</li>
+          <li><span class="dot dot--closed"></span>Закрыто</li>
         </ul>
         <p id="debug-badge" class="debug-badge" hidden>Режим разметки: нажмите на карту, чтобы узнать координаты x и y для js/places.js</p>
         <div id="map-error" class="map-error" role="alert" hidden>
@@ -81,6 +83,8 @@
           Это студенческий проект, а не официальный сервис МАИ.</p>
         <p>Схема кампуса взята с сайта mai-sten.online. Часы работы и цены собирают студенты —
           они могут меняться, уточняйте на месте.</p>
+        <p>Цвет метки показывает очередь. Пока это прогноз по времени суток, а не живые данные:
+          настоящее отслеживание очередей — в планах.</p>
         <p>Приложение не собирает и никуда не отправляет данные пользователей.</p>
         <button type="button" id="about-close" class="button">Закрыть</button>
       </section>
