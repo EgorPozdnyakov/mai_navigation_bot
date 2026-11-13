@@ -43,3 +43,35 @@ export function getStatus(place, now) {
   }
   return { open: false, text: 'Закрыто, откроется завтра в ' + opensAt };
 }
+
+// Очередь в столовой: 'green' — нет очереди, 'yellow' — небольшая, 'red' — большая.
+// Пока живого отслеживания нет, это прогноз: «случайное» число, которое зависит от
+// номера столовой и текущего часа. Поэтому у всех пользователей цвета одинаковые
+// и меняются раз в час. В обед (12–14) большая очередь бывает чаще.
+export function getQueue(place, date = new Date()) {
+  const hourNumber = Math.floor(date.getTime() / (60 * 60 * 1000)); // номер часа с 1970 года
+  const hour = (hourNumber + 3) % 24; // час по Москве
+
+  // Псевдослучайное число от 0 до 1 (одно и то же для одной столовой в течение часа).
+  const x = Math.sin(place.id * 12.9898 + hourNumber * 78.233) * 43758.5453;
+  const random = x - Math.floor(x);
+
+  let red = 0.1;    // вероятность большой очереди
+  let yellow = 0.3; // вероятность небольшой очереди
+  if (hour === 12 || hour === 13) {
+    red = 0.45;
+    yellow = 0.35;
+  } else if (hour === 11 || hour === 14) {
+    red = 0.25;
+    yellow = 0.4;
+  }
+  if (random < red) return 'red';
+  if (random < red + yellow) return 'yellow';
+  return 'green';
+}
+
+export const QUEUE_TEXT = {
+  green: 'Очереди нет',
+  yellow: 'Очередь небольшая',
+  red: 'Большая очередь',
+};
