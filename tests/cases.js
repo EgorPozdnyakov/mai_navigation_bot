@@ -4,6 +4,7 @@
 
 import { toMinutes, formatTime, getMoscowTime, getStatus, getQueue } from '../js/hours.js';
 import { PLACES } from '../js/places.js';
+import { TEXTS, t, setLang, chooseLang, placeText, paymentText } from '../js/i18n.js';
 
 // Сравнение через JSON: подходит и для чисел, и для объектов.
 function eq(actual, expected, message = '') {
@@ -16,6 +17,16 @@ function eq(actual, expected, message = '') {
 const usual = { open: '9:00', close: '17:00' };
 function status(weekday, time) {
   return getStatus(usual, { weekday, minutes: toMinutes(time) }).text;
+}
+
+// Выполнить проверку на английском, а потом обязательно вернуть русский.
+function inEnglish(run) {
+  setLang('en');
+  try {
+    run();
+  } finally {
+    setLang('ru');
+  }
 }
 
 export const cases = [
@@ -76,5 +87,42 @@ export const cases = [
       eq(place.x >= 0 && place.x <= 800 && place.y >= 0 && place.y <= 700, true, `${who}: метка внутри карты 800×700`);
       eq(Array.isArray(place.photos) && Array.isArray(place.menu), true, `${who}: photos и menu — списки`);
     }
+  }],
+
+  ['Английский: статусы и очередь', () => inEnglish(() => {
+    eq(status(1, '10:00'), 'Open until 17:00');
+    eq(status(1, '08:00'), 'Closed, opens at 09:00');
+    eq(status(1, '17:00'), 'Closed, opens tomorrow at 09:00');
+    eq(status(6, '12:00'), 'Closed, opens on Monday at 09:00');
+    eq(t('queue_red'), 'Long queue');
+  })],
+
+  ['Словарь: у каждого русского текста есть английский', () => {
+    for (const key of Object.keys(TEXTS.ru)) {
+      eq(key in TEXTS.en, true, `нет английского текста для «${key}»`);
+      eq(typeof TEXTS.en[key], typeof TEXTS.ru[key], `«${key}»: в одном языке функция, в другом строка`);
+    }
+    eq(Object.keys(TEXTS.en).filter((key) => !(key in TEXTS.ru)), [], 'лишние ключи в английском');
+  }],
+
+  ['Выбор языка при запуске', () => {
+    eq(chooseLang({ urlLang: 'en', savedLang: 'ru', userLang: 'ru' }), 'en', '?lang= в ссылке важнее всего');
+    eq(chooseLang({ urlLang: null, savedLang: 'en', userLang: 'ru-RU' }), 'en', 'потом выбор с прошлого раза');
+    eq(chooseLang({ urlLang: 'de', savedLang: null, userLang: 'ru-RU' }), 'ru', 'неизвестный ?lang= пропускаем');
+    eq(chooseLang({ urlLang: null, savedLang: null, userLang: 'en-US' }), 'en');
+    eq(chooseLang({ urlLang: null, savedLang: null, userLang: 'zh' }), 'en');
+    eq(chooseLang({ urlLang: null, savedLang: null, userLang: 'uk' }), 'ru');
+    eq(chooseLang({ urlLang: null, savedLang: null, userLang: null }), 'ru', 'ничего не известно — русский');
+  }],
+
+  ['Английские названия: если не заполнили — по-русски', () => {
+    const place = { name: 'Буфет', where: 'Корпус 1', name_en: 'Buffet', where_en: '' };
+    eq(placeText(place, 'name'), 'Буфет', 'на русском — русское название');
+    inEnglish(() => {
+      eq(placeText(place, 'name'), 'Buffet');
+      eq(placeText(place, 'where'), 'Корпус 1', 'where_en пустой');
+      eq(paymentText('только карта'), 'card only');
+      eq(paymentText('по QR-коду'), 'по QR-коду', 'неизвестный вариант оплаты — как есть');
+    });
   }],
 ];

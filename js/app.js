@@ -1,7 +1,9 @@
-// app.js — главный файл: фильтры, список, карточка столовой, меню и Telegram.
+// app.js — главный файл: фильтры, список, карточка столовой, меню, язык и Telegram.
+// Все тексты интерфейса — в js/i18n.js, здесь они берутся через t('ключ').
 
 import { PLACES } from './places.js';
-import { getMoscowTime, getStatus, getQueue, QUEUE_TEXT, formatTime, toMinutes } from './hours.js';
+import { getMoscowTime, getStatus, getQueue, queueLabel, formatTime, toMinutes } from './hours.js';
+import { t, placeText, paymentText, getLang, setLang, chooseLang, loadSavedLang, translatePage } from './i18n.js';
 import * as map from './map.js';
 
 const PHOTOS_FOLDER = 'media/photos/';
@@ -48,7 +50,7 @@ function showToast(text) {
 // Текст про очередь. У закрытой столовой очереди нет.
 function queueText(status) {
   if (!status.open) return '';
-  return QUEUE_TEXT[status.queue];
+  return queueLabel(status.queue);
 }
 
 // Строка «● Большая очередь» с цветной точкой.
@@ -88,7 +90,7 @@ function render() {
     const selected = place.id === selectedId;
     // Выбранную столовую показываем всегда, иначе метка пропала бы под карточкой.
     const show = matchesFilters(place) || selected;
-    const label = `${place.id}. ${place.name}. ${status.text}. ${queueText(status)}`.replace(/\. $/, '');
+    const label = `${place.id}. ${placeText(place, 'name')}. ${status.text}. ${queueText(status)}`.replace(/\. $/, '');
     map.updateMarker(place.id, show, !status.open, status.queue, selected, label);
   }
 
@@ -106,15 +108,17 @@ function renderList() {
   let html = '';
   for (const place of PLACES) {
     if (!matchesFilters(place)) continue;
-    if (search !== '' && !place.name.toLowerCase().includes(search)) continue;
+    // Ищем и по русскому, и по английскому названию.
+    const names = (place.name + ' ' + (place.name_en || '')).toLowerCase();
+    if (search !== '' && !names.includes(search)) continue;
     const status = statuses[place.id];
     html += `
       <li>
         <button type="button" class="list-item" data-id="${place.id}">
           <span class="badge">${place.id}</span>
           <span class="list-item__text">
-            <span class="list-item__name">${place.name}</span>
-            <span class="hint">${place.where}</span>
+            <span class="list-item__name">${placeText(place, 'name')}</span>
+            <span class="hint">${placeText(place, 'where')}</span>
             <span class="status ${status.open ? 'status--open' : 'status--closed'}">${status.text}</span>
             ${queueHtml(status, '')}
           </span>
@@ -145,11 +149,9 @@ function openCard(id, zoomIn) {
   closeMenu();
 
   const sheet = $('sheet');
-  sheet.innerHTML = cardHtml(place);
+  fillCard(place);
   sheet.hidden = false;
   sheet.scrollTop = 0;
-  $('sheet-close').onclick = closeCard;
-  $('menu-button').onclick = () => openMenu(place);
   $('sheet-title').focus({ preventScroll: true }); // программа чтения с экрана сразу прочитает название
 
   map.setBottomInset(sheet.offsetHeight);
@@ -168,7 +170,15 @@ function closeCard() {
   updateBackButton();
 }
 
+// Заполнить карточку (при открытии и при смене языка).
+function fillCard(place) {
+  $('sheet').innerHTML = cardHtml(place);
+  $('sheet-close').onclick = closeCard;
+  $('menu-button').onclick = () => openMenu(place);
+}
+
 function cardHtml(place) {
+  const name = placeText(place, 'name');
   const status = statuses[place.id];
   let html = '';
 
@@ -176,56 +186,96 @@ function cardHtml(place) {
   if (place.photos.length > 0) {
     html += '<div class="photos">';
     for (let i = 0; i < place.photos.length; i++) {
-      html += `<img class="photos__item" src="${photoUrl(place.photos[i])}" alt="${place.name}: фото ${i + 1}" loading="lazy" onerror="this.remove()">`;
+      html += `<img class="photos__item" src="${photoUrl(place.photos[i])}" alt="${t('photoAlt', name, i + 1)}" loading="lazy" onerror="this.remove()">`;
     }
     html += '</div>';
   } else {
-    html += '<div class="photos photos--empty">📷 Фото пока нет</div>';
+    html += `<div class="photos photos--empty">${t('noPhoto')}</div>`;
   }
 
   const hours = formatTime(toMinutes(place.open)) + '–' + formatTime(toMinutes(place.close));
   html += `
     <div class="sheet__header">
       <div class="sheet__titles">
-        <h2 id="sheet-title" class="sheet__title" tabindex="-1">${place.name}</h2>
+        <h2 id="sheet-title" class="sheet__title" tabindex="-1">${name}</h2>
         <p id="sheet-status" class="status ${status.open ? 'status--open' : 'status--closed'}">${status.text}</p>
         ${queueHtml(status, 'sheet-queue')}
       </div>
-      <button type="button" id="sheet-close" class="icon-button" aria-label="Закрыть карточку">×</button>
+      <button type="button" id="sheet-close" class="icon-button" aria-label="${t('closeCard')}">×</button>
     </div>
     <div class="sheet__buttons">
-      <button type="button" id="menu-button" class="button">Меню</button>
+      <button type="button" id="menu-button" class="button">${t('menuButton')}</button>
     </div>
     <dl class="details">
-      <div class="details__row"><dt>Где</dt><dd>${place.where}</dd></div>
-      <div class="details__row"><dt>Часы работы</dt><dd>Пн–Пт ${hours}<br>Сб–Вс закрыто</dd></div>
-      <div class="details__row"><dt>Средний чек</dt><dd>${place.price} ₽</dd></div>
-      <div class="details__row"><dt>Оплата</dt><dd>${place.payment}</dd></div>
-      <div class="details__row"><dt>Для маломобильных</dt><dd>${place.accessible ? 'доступно ♿' : 'недоступно'}</dd></div>
+      <div class="details__row"><dt>${t('where')}</dt><dd>${placeText(place, 'where')}</dd></div>
+      <div class="details__row"><dt>${t('hours')}</dt><dd>${t('weekdaysHours', hours)}<br>${t('weekendClosed')}</dd></div>
+      <div class="details__row"><dt>${t('price')}</dt><dd>${t('rubles', place.price)}</dd></div>
+      <div class="details__row"><dt>${t('payment')}</dt><dd>${paymentText(place.payment)}</dd></div>
+      <div class="details__row"><dt>${t('accessibility')}</dt><dd>${place.accessible ? t('accessibleYes') : t('accessibleNo')}</dd></div>
     </dl>`;
   return html;
 }
 
 // ---------- Меню (фото) ----------
 
+let menuPlace = null; // столовая, чьё меню открыто (чтобы перевести экран при смене языка)
+
 function openMenu(place) {
-  let html = '';
-  if (place.menu.length === 0) {
-    html = '<p class="message">Меню этой столовой пока не добавили.</p>';
-  }
-  for (const fileName of place.menu) {
-    html += `<img class="menu-photo" src="${photoUrl(fileName)}" alt="Меню: ${place.name}" onerror="this.remove()">`;
-  }
-  $('menu-title').textContent = 'Меню: ' + place.name;
-  $('menu-content').innerHTML = html;
+  fillMenu(place);
   $('menu-content').scrollTop = 0;
   $('menu-screen').hidden = false;
   $('menu-title').focus({ preventScroll: true });
   updateBackButton();
 }
 
+function fillMenu(place) {
+  menuPlace = place;
+  const name = placeText(place, 'name');
+  let html = '';
+  if (place.menu.length === 0) {
+    html = `<p class="message">${t('menuEmpty')}</p>`;
+  }
+  for (const fileName of place.menu) {
+    html += `<img class="menu-photo" src="${photoUrl(fileName)}" alt="${t('menuAlt', name)}" onerror="this.remove()">`;
+  }
+  $('menu-title').textContent = t('menuTitle', name);
+  $('menu-content').innerHTML = html;
+}
+
 function closeMenu() {
   $('menu-screen').hidden = true;
+  menuPlace = null;
+}
+
+// ---------- Язык (русский / английский) ----------
+
+// Перевести всё, что сейчас на экране. Карточку и меню перерисовываем на месте,
+// карту не двигаем.
+function applyLanguage() {
+  translatePage();
+  // На кнопке написан язык, на который переключимся, — для программ чтения указываем его язык.
+  $('lang-button').lang = getLang() === 'ru' ? 'en' : 'ru';
+  map.translateMap();
+  updateStatuses(); // тексты «Открыто до …» и очередей — на новом языке
+  if (selectedId !== null) fillCard(findPlace(selectedId));
+  if (menuPlace !== null) fillMenu(menuPlace);
+}
+
+function toggleLanguage() {
+  setLang(getLang() === 'ru' ? 'en' : 'ru', { save: true });
+  applyLanguage();
+}
+
+// Язык при запуске: ?lang=… в ссылке, выбор с прошлого раза, язык Telegram или браузера.
+function startLanguage() {
+  const telegramLang = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.language_code : null;
+  setLang(chooseLang({
+    urlLang: new URLSearchParams(location.search).get('lang'),
+    savedLang: loadSavedLang(),
+    userLang: inTelegram ? telegramLang : navigator.language,
+  }));
+  translatePage();
+  $('lang-button').lang = getLang() === 'ru' ? 'en' : 'ru';
 }
 
 // ---------- Кнопка «Назад» (системная в Telegram, своя в браузере, Esc) ----------
@@ -311,7 +361,9 @@ async function startMap() {
 }
 
 function start() {
+  startLanguage();
   setupTelegram();
+  $('lang-button').onclick = toggleLanguage;
   if (debug) $('debug-badge').hidden = false;
 
   for (const button of document.querySelectorAll('[data-view]')) {
@@ -362,7 +414,7 @@ function start() {
   const id = startPlaceId();
   if (id !== null) {
     if (findPlace(id)) openCard(id, true);
-    else showToast(`Столовая №${id} не найдена`);
+    else showToast(t('placeNotFound', id));
   }
 }
 

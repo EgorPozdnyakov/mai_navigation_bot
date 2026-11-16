@@ -90,6 +90,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 .icon-button--info { font: italic 700 20px Georgia, serif; }
+.icon-button--lang { font-size: 15px; font-weight: 700; }
+
+/* Кнопки языка и «О проекте» справа в первом ряду панели */
+.topbar__actions { display: flex; gap: 6px; }
 
 /* ---------- Верхняя панель ---------- */
 .topbar {
@@ -470,7 +474,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (min-width: 720px) {
   .topbar { flex-direction: row; align-items: center; }
   .topbar__row { display: contents; }
-  #about-button { order: 1; margin-left: auto; }
+  .topbar__actions { order: 1; margin-left: auto; }
 
   .sheet {
     left: 16px;

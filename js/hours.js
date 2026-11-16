@@ -1,6 +1,9 @@
 // hours.js — открыта ли столовая сейчас.
 // Время — число минут от начала суток (08:30 → 510), день недели — как в JavaScript:
 // 0 — воскресенье, 1 — понедельник, …, 6 — суббота. Столовые работают пн–пт.
+// Тексты статуса берутся из js/i18n.js — на русском или английском.
+
+import { t } from './i18n.js';
 
 // "8:30" → 510
 export function toMinutes(time) {
@@ -23,7 +26,7 @@ export function getMoscowTime(date = new Date()) {
 }
 
 // Открыта ли столовая в момент now ({ weekday, minutes }).
-// Возвращает { open: true/false, text: 'Открыто до 17:00' }.
+// Возвращает { open: true/false, text: 'Открыто до 17:00' } (текст — на текущем языке).
 export function getStatus(place, now) {
   const open = toMinutes(place.open);
   const close = toMinutes(place.close);
@@ -31,17 +34,17 @@ export function getStatus(place, now) {
   const opensAt = formatTime(open);
 
   if (workday && now.minutes >= open && now.minutes < close) {
-    return { open: true, text: 'Открыто до ' + formatTime(close) };
+    return { open: true, text: t('openUntil', formatTime(close)) };
   }
   if (workday && now.minutes < open) {
-    return { open: false, text: 'Закрыто, откроется в ' + opensAt };
+    return { open: false, text: t('opensToday', opensAt) };
   }
   // Сегодня уже закрыто или выходной: в пн–чт и в воскресенье откроется завтра,
   // в пятницу вечером и в субботу — в понедельник.
   if (now.weekday === 5 || now.weekday === 6) {
-    return { open: false, text: 'Закрыто, откроется в понедельник в ' + opensAt };
+    return { open: false, text: t('opensMonday', opensAt) };
   }
-  return { open: false, text: 'Закрыто, откроется завтра в ' + opensAt };
+  return { open: false, text: t('opensTomorrow', opensAt) };
 }
 
 // Очередь в столовой: 'green' — нет очереди, 'yellow' — небольшая, 'red' — большая.
@@ -70,8 +73,7 @@ export function getQueue(place, date = new Date()) {
   return 'green';
 }
 
-export const QUEUE_TEXT = {
-  green: 'Очереди нет',
-  yellow: 'Очередь небольшая',
-  red: 'Большая очередь',
-};
+// Текст про очередь на текущем языке: 'green' → «Очереди нет».
+export function queueLabel(queue) {
+  return t('queue_' + queue);
+}

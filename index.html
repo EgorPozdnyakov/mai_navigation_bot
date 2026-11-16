@@ -22,15 +22,19 @@
     <!-- Верхняя панель: вид и фильтры -->
     <header class="topbar">
       <div class="topbar__row">
-        <div class="segmented" role="group" aria-label="Вид">
-          <button type="button" data-view="map" aria-pressed="true">Карта</button>
-          <button type="button" data-view="list" aria-pressed="false">Список</button>
+        <div class="segmented" role="group" aria-label="Вид" data-i18n-aria="viewGroup">
+          <button type="button" data-view="map" aria-pressed="true" data-i18n="viewMap">Карта</button>
+          <button type="button" data-view="list" aria-pressed="false" data-i18n="viewList">Список</button>
         </div>
-        <button type="button" class="icon-button icon-button--info" id="about-button" aria-label="О проекте">i</button>
+        <div class="topbar__actions">
+          <!-- Смена языка: на кнопке написан язык, на который переключимся -->
+          <button type="button" class="icon-button icon-button--lang" id="lang-button" lang="en" data-i18n="langButton" data-i18n-aria="langButtonLabel" aria-label="Switch to English">EN</button>
+          <button type="button" class="icon-button icon-button--info" id="about-button" aria-label="О проекте" data-i18n-aria="aboutButton">i</button>
+        </div>
       </div>
-      <div class="chips" role="group" aria-label="Фильтры">
-        <button type="button" class="chip" id="open-now" aria-pressed="false">Открыто сейчас</button>
-        <button type="button" class="chip" id="accessible" aria-pressed="false">♿ Для маломобильных</button>
+      <div class="chips" role="group" aria-label="Фильтры" data-i18n-aria="filters">
+        <button type="button" class="chip" id="open-now" aria-pressed="false" data-i18n="openNow">Открыто сейчас</button>
+        <button type="button" class="chip" id="accessible" aria-pressed="false" data-i18n="accessibleFilter">♿ Для маломобильных</button>
       </div>
     </header>
 
@@ -38,25 +42,25 @@
       <!-- Карта -->
       <section id="map-view" class="map-view">
         <div id="map" class="map"></div>
-        <ul class="legend" aria-label="Обозначения">
-          <li><span class="dot dot--green"></span>Очереди нет</li>
-          <li><span class="dot dot--yellow"></span>Небольшая очередь</li>
-          <li><span class="dot dot--red"></span>Большая очередь</li>
-          <li><span class="dot dot--closed"></span>Закрыто</li>
+        <ul class="legend" aria-label="Обозначения" data-i18n-aria="legend">
+          <li><span class="dot dot--green"></span><span data-i18n="legendGreen">Очереди нет</span></li>
+          <li><span class="dot dot--yellow"></span><span data-i18n="legendYellow">Небольшая очередь</span></li>
+          <li><span class="dot dot--red"></span><span data-i18n="legendRed">Большая очередь</span></li>
+          <li><span class="dot dot--closed"></span><span data-i18n="legendClosed">Закрыто</span></li>
         </ul>
-        <p id="debug-badge" class="debug-badge" hidden>Режим разметки: нажмите на карту, чтобы узнать координаты x и y для js/places.js</p>
+        <p id="debug-badge" class="debug-badge" data-i18n="debugBadge" hidden>Режим разметки: нажмите на карту, чтобы узнать координаты x и y для js/places.js</p>
         <div id="map-error" class="map-error" role="alert" hidden>
-          <p><b>Не удалось загрузить карту кампуса.</b></p>
-          <p>Проверьте, что файл media/map.jpg есть на сайте. Пока можно посмотреть столовые списком.</p>
-          <button type="button" class="button" data-view="list">Открыть список</button>
+          <p><b data-i18n="mapErrorTitle">Не удалось загрузить карту кампуса.</b></p>
+          <p data-i18n="mapErrorHint">Проверьте, что файл media/map.jpg есть на сайте. Пока можно посмотреть столовые списком.</p>
+          <button type="button" class="button" data-view="list" data-i18n="openList">Открыть список</button>
         </div>
       </section>
 
       <!-- Список -->
       <section id="list-view" class="list-view" hidden>
-        <input type="search" id="search" class="search" placeholder="Поиск по названию" aria-label="Поиск по названию">
+        <input type="search" id="search" class="search" placeholder="Поиск по названию" aria-label="Поиск по названию" data-i18n-placeholder="search" data-i18n-aria="search">
         <ul id="places-list" class="places-list"></ul>
-        <p id="list-empty" class="message" hidden>Ничего не нашлось. Попробуйте другой фильтр.</p>
+        <p id="list-empty" class="message" data-i18n="listEmpty" hidden>Ничего не нашлось. Попробуйте другой фильтр.</p>
       </section>
 
       <!-- Карточка места (выезжает снизу), заполняет app.js -->
@@ -67,7 +71,7 @@
     <section id="menu-screen" class="screen" role="dialog" aria-modal="true" aria-labelledby="menu-title" hidden>
       <header class="screen__header">
         <!-- В Telegram эта кнопка скрыта: там есть системная «Назад» -->
-        <button type="button" id="menu-back" class="back-button">← Назад</button>
+        <button type="button" id="menu-back" class="back-button" data-i18n="menuBack">← Назад</button>
         <h2 id="menu-title" class="screen__title" tabindex="-1"></h2>
       </header>
       <div id="menu-content" class="screen__body"></div>
@@ -76,17 +80,18 @@
     <!-- О проекте -->
     <div id="about" class="modal" hidden>
       <section class="modal__box" role="dialog" aria-modal="true" aria-labelledby="about-title">
-        <h2 id="about-title">О проекте</h2>
-        <p>Карта столовых на основной территории МАИ (метро «Сокол»).
+        <!-- Тексты окна — в js/i18n.js (about1…about5), здесь — русский вариант до запуска скрипта -->
+        <h2 id="about-title" data-i18n="aboutTitle">О проекте</h2>
+        <p data-i18n="about1">Карта столовых на основной территории МАИ (метро «Сокол»).
           Нажмите на метку, чтобы узнать, открыта ли столовая, где она находится и сколько стоит обед.</p>
-        <p>Приложение сделали студенты МАИ в рамках дисциплины «Обучение служением».
+        <p data-i18n="about2">Приложение сделали студенты МАИ в рамках дисциплины «Обучение служением».
           Это студенческий проект, а не официальный сервис МАИ.</p>
-        <p>Схема кампуса взята с сайта mai-sten.online. Часы работы и цены собирают студенты —
+        <p data-i18n="about3">Схема кампуса взята с сайта mai-sten.online. Часы работы и цены собирают студенты —
           они могут меняться, уточняйте на месте.</p>
-        <p>Цвет метки показывает очередь. Пока это прогноз по времени суток, а не живые данные:
+        <p data-i18n="about4">Цвет метки показывает очередь. Пока это прогноз по времени суток, а не живые данные:
           настоящее отслеживание очередей — в планах.</p>
-        <p>Приложение не собирает и никуда не отправляет данные пользователей.</p>
-        <button type="button" id="about-close" class="button">Закрыть</button>
+        <p data-i18n="about5">Приложение не собирает и никуда не отправляет данные пользователей.</p>
+        <button type="button" id="about-close" class="button" data-i18n="close">Закрыть</button>
       </section>
     </div>
 
@@ -96,7 +101,8 @@
   <script>
     // Если открыть index.html двойным кликом (file://), браузер не даст загрузить модули.
     if (location.protocol === 'file:') {
-      alert('Откройте приложение через локальный сервер: в папке проекта выполните «python -m http.server» и откройте http://localhost:8000');
+      alert('Откройте приложение через локальный сервер: в папке проекта выполните «python -m http.server» и откройте http://localhost:8000\n\n' +
+        'Open the app via a local server: run "python -m http.server" in the project folder and open http://localhost:8000');
     }
   </script>
   <script src="vendor/leaflet/leaflet.js"></script>

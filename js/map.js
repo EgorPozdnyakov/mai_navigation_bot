@@ -4,6 +4,8 @@
 // В places.js x идёт вправо, y — вниз, а у Leaflet первая координата растёт вверх.
 // Поэтому точка картинки (x, y) для Leaflet — это [-y, x].
 
+import { t } from './i18n.js';
+
 const MAP_IMAGE = 'media/map.jpg';
 const MAX_ZOOM = 1; // насколько можно приблизить: 0 — пиксель в пиксель, 1 — в 2 раза крупнее
 
@@ -13,6 +15,10 @@ let width = 0;         // размеры картинки в пикселях
 let height = 0;
 let fitZoom = 0;       // масштаб, при котором видна вся карта
 let bottomInset = 0;   // сколько пикселей снизу закрывает карточка места
+let zoomControl = null;
+let attribution = null;
+let credit = '';       // подпись «Карта: …» на текущем языке
+let overlay = null;    // картинка карты
 const markers = {};    // id места → метка
 
 function loadImage(url) {
@@ -41,9 +47,10 @@ export async function createMap(debug, onMapClick) {
     attributionControl: false,
   });
   // Кнопки +/− и подпись — справа внизу, сверху их закрывали бы фильтры.
-  L.control.zoom({ position: 'bottomright', zoomInTitle: 'Приблизить', zoomOutTitle: 'Отдалить' }).addTo(map);
-  L.control.attribution({ position: 'bottomright', prefix: 'Leaflet' }).addTo(map);
-  L.imageOverlay(MAP_IMAGE, bounds, { attribution: 'Карта: mai-sten.online', alt: 'Схема кампуса МАИ' }).addTo(map);
+  zoomControl = L.control.zoom({ position: 'bottomright' }).addTo(map);
+  attribution = L.control.attribution({ position: 'bottomright', prefix: 'Leaflet' }).addTo(map);
+  overlay = L.imageOverlay(MAP_IMAGE, bounds, { alt: t('mapAlt') }).addTo(map);
+  translateMap();
 
   updateZoomLimits();
   map.fitBounds(bounds, { animate: false });
@@ -59,6 +66,25 @@ export async function createMap(debug, onMapClick) {
     if (debug) showCoordinates(event.latlng);
     else onMapClick();
   });
+}
+
+// Тексты карты на текущем языке: подсказки у кнопок +/−, подпись «Карта: …»,
+// описание картинки. Вызывается при создании карты и при смене языка.
+export function translateMap() {
+  if (!map) return;
+  for (const [selector, key] of [['.leaflet-control-zoom-in', 'zoomIn'], ['.leaflet-control-zoom-out', 'zoomOut']]) {
+    const button = zoomControl.getContainer().querySelector(selector);
+    button.title = t(key);
+    button.setAttribute('aria-label', t(key));
+  }
+  if (credit) attribution.removeAttribution(credit);
+  credit = t('mapCredit');
+  attribution.addAttribution(credit);
+  // Описание картинки для программ чтения с экрана. Сама картинка появляется
+  // чуть позже создания карты, поэтому при первом вызове её может ещё не быть.
+  overlay.options.alt = t('mapAlt');
+  if (overlay.getElement()) overlay.getElement().alt = t('mapAlt');
+  map.closePopup(); // окно режима разметки перерисуется на новом языке при следующем нажатии
 }
 
 // Отдалить можно до «вся карта на экране», приблизить — до MAX_ZOOM.
@@ -152,9 +178,9 @@ function showCoordinates(latlng) {
   const y = Math.round(-latlng.lat);
   let html = `<b>x: ${x}, y: ${y}</b><br>`;
   if (x < 0 || y < 0 || x > width || y > height) {
-    html += '<small>Эта точка за краем картинки</small>';
+    html += `<small>${t('debugOutside')}</small>`;
   } else {
-    html += '<button type="button" class="button button--small" id="copy-button">Скопировать</button>';
+    html += `<button type="button" class="button button--small" id="copy-button">${t('debugCopy')}</button>`;
   }
   L.popup().setLatLng(latlng).setContent(html).openOn(map);
 
@@ -163,9 +189,9 @@ function showCoordinates(latlng) {
   button.onclick = async () => {
     try {
       await navigator.clipboard.writeText(`x: ${x}, y: ${y}`);
-      button.textContent = 'Скопировано';
+      button.textContent = t('debugCopied');
     } catch (error) {
-      button.textContent = 'Не вышло, перепишите вручную';
+      button.textContent = t('debugCopyFailed');
     }
   };
 }
