@@ -16,7 +16,7 @@ export const PLACES = [
     id: 1, name: 'Столовая у КПП №5', where: 'Корпус 7, 3 этаж',
     name_en: 'Canteen by Gate 5', where_en: 'Building 7, 3rd floor',
     open: '9:00', close: '17:00', price: 400, payment: 'наличные и карта', accessible: false,
-    x: 395, y: 69, photos: [], menu: [],
+    x: 395, y: 69, photos: ["1-1.jpg", "1-2.jpg", "1-3.jpg", "1-4.jpg"], menu: [],
   },
   {
     id: 2, name: 'Столовая в 24 корпусе', where: 'Корпус 24, 1 этаж',
