@@ -58,18 +58,18 @@ export const PLACES = [
     id: 8, name: 'Ледокол', where: 'Ул. Константина Царёва, д. 16',
     name_en: 'Ledokol', where_en: '16 Konstantina Tsaryova St.',
     open: '9:00', close: '18:00', price: 450, payment: 'только наличные', accessible: true,
-    x: 139, y: 275, photos: [], menu: [],
+    x: 139, y: 275, photos: ["8-1.jpg","8-2.jpg"], menu: [],
   },
   {
     id: 9, name: 'Теремок', where: 'ГУК, зона «В», балкон',
     name_en: 'Teremok', where_en: 'Main Academic Building (GUK), zone V, balcony',
     open: '8:30', close: '18:30', price: 350, payment: 'наличные и карта', accessible: false,
-    x: 392, y: 314, photos: [], menu: [],
+    x: 392, y: 314, photos: ["9-1.jpg", "9-2.jpg", "9-3.jpg", "9-4.jpg"], menu: [],
   },
   {
     id: 10, name: 'Столовая в ГУКе', where: 'ГУК, зона «Б», 4 этаж',
     name_en: 'Canteen in GUK', where_en: 'Main Academic Building (GUK), zone B, 4th floor',
     open: '10:00', close: '18:00', price: 650, payment: 'наличные и карта', accessible: false,
-    x: 398, y: 263, photos: [], menu: [],
+    x: 398, y: 263, photos: ["10-1.jpg","10-2.jpg"], menu: [],
   },
 ];
