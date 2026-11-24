@@ -16,8 +16,6 @@ let height = 0;
 let fitZoom = 0;       // масштаб, при котором видна вся карта
 let bottomInset = 0;   // сколько пикселей снизу закрывает карточка места
 let zoomControl = null;
-let attribution = null;
-let credit = '';       // подпись «Карта: …» на текущем языке
 let overlay = null;    // картинка карты
 const markers = {};    // id места → метка
 
@@ -46,9 +44,8 @@ export async function createMap(debug, onMapClick) {
     zoomControl: false,
     attributionControl: false,
   });
-  // Кнопки +/− и подпись — справа внизу, сверху их закрывали бы фильтры.
+  // Кнопки +/− — справа внизу, рядом с легендой.
   zoomControl = L.control.zoom({ position: 'bottomright' }).addTo(map);
-  attribution = L.control.attribution({ position: 'bottomright', prefix: 'Leaflet' }).addTo(map);
   overlay = L.imageOverlay(MAP_IMAGE, bounds, { alt: t('mapAlt') }).addTo(map);
   translateMap();
 
@@ -68,8 +65,7 @@ export async function createMap(debug, onMapClick) {
   });
 }
 
-// Тексты карты на текущем языке: подсказки у кнопок +/−, подпись «Карта: …»,
-// описание картинки. Вызывается при создании карты и при смене языка.
+// Подсказки кнопок +/− и описание картинки на текущем языке.
 export function translateMap() {
   if (!map) return;
   for (const [selector, key] of [['.leaflet-control-zoom-in', 'zoomIn'], ['.leaflet-control-zoom-out', 'zoomOut']]) {
@@ -77,9 +73,6 @@ export function translateMap() {
     button.title = t(key);
     button.setAttribute('aria-label', t(key));
   }
-  if (credit) attribution.removeAttribution(credit);
-  credit = t('mapCredit');
-  attribution.addAttribution(credit);
   // Описание картинки для программ чтения с экрана. Сама картинка появляется
   // чуть позже создания карты, поэтому при первом вызове её может ещё не быть.
   overlay.options.alt = t('mapAlt');

@@ -162,9 +162,35 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .map-view.is-hidden { visibility: hidden; }
 
 .leaflet-container { background: var(--surface-2); font: inherit; }
-.leaflet-bar a, .leaflet-bar a:hover { background: var(--surface); color: var(--text); }
-.leaflet-container .leaflet-control-attribution { background: var(--surface); color: var(--hint); }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); }
+
+.map .leaflet-control-zoom {
+  display: grid;
+  gap: 8px;
+  margin: 0 12px 12px 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.map .leaflet-control-zoom.leaflet-bar a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font: 600 24px/1 system-ui, sans-serif;
+  text-indent: 0;
+}
+
+.map .leaflet-control-zoom a:not(.leaflet-disabled):is(:hover, :active) {
+  background: var(--surface-2);
+}
+
+.map .leaflet-control-zoom a.leaflet-disabled { color: var(--hint); opacity: 0.6; }
 
 /* Метка: невидимая область 44×44, внутри — цветной кружок с номером. */
 .marker { display: flex; align-items: center; justify-content: center; }
@@ -469,6 +495,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 .modal__box h2 { margin-top: 0; }
+.modal__box a { color: var(--link); }
 .modal__box .button { width: 100%; }
 
 
