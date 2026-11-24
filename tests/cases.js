@@ -5,6 +5,7 @@
 import { toMinutes, formatTime, getMoscowTime, getStatus, getQueue } from '../js/hours.js';
 import { PLACES } from '../js/places.js';
 import { MENUS } from '../js/menus.js';
+import { findDishes } from '../js/dish-search.js';
 import { TEXTS, t, setLang, chooseLang, placeText, paymentText } from '../js/i18n.js';
 
 // Сравнение через JSON: подходит и для чисел, и для объектов.
@@ -105,6 +106,18 @@ export const cases = [
         }
       }
     }
+  }],
+
+  ['Поиск по блюдам учитывает оба языка, регистр и знаки', () => {
+    const results = findDishes('  КАПУСТА, тушен  ');
+    eq(results.map(({ placeId }) => placeId), [3, 4]);
+    eq(results[1].matches[0].dish[2], 100);
+
+    const [teremok] = findDishes('salmon crepe');
+    eq(teremok.placeId, 9);
+    eq(teremok.matches[0].key, '9-pancakes-5');
+    eq(findDishes('   ... '), []);
+    eq(findDishes('неизвестное блюдо'), []);
   }],
 
   ['Английский: статусы и очередь', () => inEnglish(() => {

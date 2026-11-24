@@ -3,6 +3,7 @@
 
 import { PLACES } from './places.js';
 import { MENUS } from './menus.js';
+import { findDishes } from './dish-search.js';
 import { getMoscowTime, getStatus, getQueue, queueLabel, formatTime, toMinutes } from './hours.js';
 import { t, placeText, paymentText, getLang, setLang, chooseLang, loadSavedLang, translatePage } from './i18n.js';
 import * as map from './map.js';
@@ -11,7 +12,7 @@ const PHOTOS_FOLDER = 'media/photos/';
 
 // ---------- Состояние приложения ----------
 const statuses = {};        // id столовой → { open, text, queue }, пересчитываем раз в минуту
-let view = 'map';           // 'map' или 'list'
+let view = 'map';           // 'map', 'list' или 'dishes'
 let openNowOnly = false;    // фильтр «Открыто сейчас»
 let accessibleOnly = false; // фильтр ♿
 let search = '';            // поиск в списке
@@ -96,6 +97,7 @@ function render() {
   }
 
   renderList();
+  if (view === 'dishes') renderDishes();
 
   if (selectedId !== null) {
     const status = statuses[selectedId];
@@ -131,13 +133,58 @@ function renderList() {
 }
 
 function setView(newView) {
+  if (newView !== 'map') closeCard();
   view = newView;
-  if (view === 'list') closeCard();
   // Карту прячем через visibility (класс is-hidden): так Leaflet не теряет размеры.
   $('map-view').classList.toggle('is-hidden', view !== 'map');
   $('list-view').hidden = view !== 'list';
+  $('dishes-view').hidden = view !== 'dishes';
   if (view === 'map') map.refreshSize();
   render();
+}
+
+// ---------- Поиск по блюдам ----------
+
+function renderDishes() {
+  const query = $('dish-query').value.trim();
+  const results = $('dish-results');
+  const focused = results.contains(document.activeElement) ? document.activeElement.id : '';
+  const english = getLang() === 'en';
+  let count = 0;
+  let html = '';
+
+  for (const { placeId, matches } of findDishes(query)) {
+    const place = findPlace(placeId);
+    if (!place || !matchesFilters(place)) continue;
+    const status = statuses[placeId];
+    count += matches.length;
+    const titleId = `dish-place-${placeId}`;
+    const rows = matches.map(({ key, dish: [nameRu, nameEn, price] }) => `
+      <li>
+        <button type="button" class="dish-result__row" id="dish-result-${key}"
+          data-dish-key="${key}" data-dish-place="${placeId}" aria-describedby="${titleId}">
+          <span>${english ? nameEn : nameRu}</span>
+          <span class="dish-result__price">${t('rubles', price)}</span>
+          <span class="dish-result__arrow" aria-hidden="true"></span>
+        </button>
+      </li>`).join('');
+    html += `
+      <section class="dish-result" aria-labelledby="${titleId}">
+        <header class="dish-result__header">
+          <h3 id="${titleId}">${placeText(place, 'name')}</h3>
+          <span class="status ${status.open ? 'status--open' : 'status--closed'}">${status.text}</span>
+        </header>
+        <ul>${rows}</ul>
+      </section>`;
+  }
+
+  $('dish-suggestions').hidden = query !== '';
+  $('dish-results-empty').hidden = query === '' || count > 0;
+  const summary = query === '' ? '' : count ? t('dishSearchCount', count) : t('dishSearchEmpty');
+  const summaryElement = $('dish-results-status');
+  if (summaryElement.textContent !== summary) summaryElement.textContent = summary;
+  results.innerHTML = html;
+  if (focused) ($(focused) || $('dish-query')).focus({ preventScroll: true });
 }
 
 // ---------- Карточка столовой ----------
@@ -220,12 +267,16 @@ function cardHtml(place) {
 // ---------- Меню ----------
 
 let menuPlace = null; // столовая, чьё меню открыто (чтобы перевести экран при смене языка)
+let menuDish = null;  // блюдо, выбранное в поиске
 
-function openMenu(place) {
+function openMenu(place, dishKey = null) {
+  menuDish = dishKey;
   fillMenu(place);
   $('menu-content').scrollTop = 0;
   $('menu-screen').hidden = false;
-  $('menu-title').focus({ preventScroll: true });
+  const dish = menuDish && $('menu-dish-' + menuDish);
+  if (dish) dish.scrollIntoView({ block: 'center' });
+  (dish || $('menu-title')).focus({ preventScroll: true });
   updateBackButton();
 }
 
@@ -243,11 +294,15 @@ function fillMenu(place) {
     const note = t(menu.sample ? 'menuSampleNote' : 'menuFromPhotoNote');
     html = `<p class="menu-source"><strong>${heading}</strong><br>${note}</p>`;
     for (const [category, dishes] of Object.entries(menu.dishes)) {
-      const items = dishes.map(([nameRu, nameEn, price]) => `
-        <li class="menu-list__item">
+      const items = dishes.map(([nameRu, nameEn, price], index) => {
+        const key = `${place.id}-${category}-${index}`;
+        const selected = menuDish === key;
+        return `
+        <li class="menu-list__item${selected ? ' menu-list__item--selected' : ''}"${selected ? ` id="menu-dish-${key}" tabindex="-1"` : ''}>
           <span>${lang === 'en' ? nameEn : nameRu}</span>
           <span class="menu-list__price">${t('rubles', price)}</span>
-        </li>`).join('');
+        </li>`;
+      }).join('');
       html += `<section class="menu-category">
         <h3>${t('menuCategory_' + category)}</h3>
         <ul class="menu-list">${items}</ul>
@@ -266,6 +321,7 @@ function fillMenu(place) {
 function closeMenu() {
   $('menu-screen').hidden = true;
   menuPlace = null;
+  menuDish = null;
 }
 
 // ---------- Язык (русский / английский) ----------
@@ -307,8 +363,9 @@ function goBack() {
     $('about').hidden = true;
     $('about-button').focus();
   } else if (!$('menu-screen').hidden) {
+    const origin = menuDish ? $('dish-result-' + menuDish) || $('dish-query') : $('menu-button');
     closeMenu();
-    if ($('menu-button')) $('menu-button').focus();
+    origin?.focus({ preventScroll: true });
   } else {
     closeCard();
   }
@@ -407,6 +464,20 @@ function start() {
     if (!item) return;
     setView('map');
     openCard(Number(item.dataset.id), true);
+  };
+
+  $('dish-query').oninput = renderDishes;
+  $('dish-suggestions').onclick = (event) => {
+    const suggestion = event.target.closest('[data-dish-suggestion]');
+    if (!suggestion) return;
+    $('dish-query').value = t(suggestion.dataset.dishSuggestion);
+    renderDishes();
+    $('dish-results-status').focus({ preventScroll: true });
+  };
+  $('dish-results').onclick = (event) => {
+    const result = event.target.closest('[data-dish-key]');
+    if (!result) return;
+    openMenu(findPlace(Number(result.dataset.dishPlace)), result.dataset.dishKey);
   };
 
   $('about-button').onclick = () => {

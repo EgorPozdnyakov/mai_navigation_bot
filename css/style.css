@@ -112,7 +112,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .segmented button {
   min-height: 38px;
-  padding: 0 12px;
+  padding: 0 clamp(7px, 2.4vw, 12px);
   border: 0;
   border-radius: 999px;
   background: none;
@@ -120,6 +120,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 .segmented button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+
+@media (max-width: 360px) {
+  .topbar { padding-inline: 8px; }
+  .topbar__row { gap: 4px; }
+  .segmented button { font-size: 14px; }
+}
 
 .chips { display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 
@@ -333,6 +339,144 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .status--open { color: var(--open); }
 .status--closed { color: var(--closed); }
 
+/* ---------- Поиск по блюдам ---------- */
+.dishes-view {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 16px 12px 28px;
+  background: var(--surface-2);
+}
+
+.dish-search { max-width: 640px; margin: 0 auto; }
+
+.dish-search__intro {
+  padding: clamp(14px, 4vw, 24px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 13%, var(--surface)), var(--surface) 84%);
+}
+
+.dish-search__intro h2 {
+  margin: 0 0 14px;
+  font-size: clamp(23px, 5.8vw, 32px);
+  line-height: 1.16;
+  letter-spacing: -0.035em;
+}
+
+.dish-search__field {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface);
+  cursor: text;
+}
+
+.dish-search__field:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.dish-search__icon {
+  position: relative;
+  flex: 0 0 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  color: var(--link);
+}
+
+.dish-search__icon::after {
+  position: absolute;
+  right: -5px;
+  bottom: -2px;
+  width: 7px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: rotate(45deg);
+  content: "";
+}
+
+.dish-search__field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+
+.dish-search__field input::placeholder { color: var(--hint); opacity: 1; }
+.dish-search__suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+
+.dish-search__suggestions button {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--link);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dish-search__suggestions button:is(:hover, :active) { background: var(--surface-2); }
+
+@media (max-width: 360px) {
+  .dish-search__suggestions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.dish-search__status { margin: 18px 4px 9px; color: var(--hint); font-size: 14px; font-weight: 650; }
+.dish-search__status:empty { margin: 0; }
+.dish-search__empty { margin: 0 4px; color: var(--hint); }
+.dish-results { display: grid; gap: 12px; }
+
+.dish-result {
+  padding: 12px 14px 4px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.dish-result__header { padding-bottom: 8px; }
+.dish-result__header h3 { margin: 0; font-size: 16px; line-height: 1.25; }
+.dish-result__header .status { margin: 5px 0 0; font-size: 13px; }
+.dish-result__header .status::before { width: 7px; height: 7px; }
+
+.dish-result ul { margin: 0; padding: 0; list-style: none; }
+.dish-result li { border-top: 1px solid var(--border); }
+
+.dish-result__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 8px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 7px 3px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-weight: 600;
+  text-align: left;
+}
+
+.dish-result__row:is(:hover, :active) { background: var(--surface-2); }
+.dish-result__price { color: var(--link); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.dish-result__arrow {
+  width: 6px;
+  height: 6px;
+  border: solid var(--hint);
+  border-width: 1.5px 1.5px 0 0;
+  transform: rotate(45deg);
+}
+
 /* Очередь: точка нужного цвета и текст. */
 .queue { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 15px; }
 .queue::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; }
@@ -467,6 +611,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border-bottom: 1px solid var(--border);
 }
 .menu-list__price { white-space: nowrap; font-weight: 600; }
+.menu-list__item--selected {
+  padding-inline: 9px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  box-shadow: inset 3px 0 var(--accent);
+}
 
 /* Фото меню — во всю ширину экрана. */
 .menu-photo { display: block; width: 100%; margin-top: 12px; border-radius: 12px; }

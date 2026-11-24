@@ -11,12 +11,15 @@
 //
 // Названия и адреса столовых переводятся в js/places.js полями name_en и where_en.
 
+const russianDishCount = new Intl.PluralRules('ru');
+
 export const TEXTS = {
   ru: {
     title: 'Столовые МАИ',
     viewGroup: 'Вид',
     viewMap: 'Карта',
     viewList: 'Список',
+    viewDishes: 'Блюда',
     langButton: 'EN',
     langButtonLabel: 'Switch to English',
     aboutButton: 'О проекте',
@@ -45,6 +48,16 @@ export const TEXTS = {
 
     search: 'Поиск по названию',
     listEmpty: 'Ничего не нашлось. Попробуйте другой фильтр.',
+    dishSearchTitle: 'Поиск по блюдам',
+    dishSearchLabel: 'Название блюда',
+    dishSearchPlaceholder: 'Например, сырники',
+    dishSearchCount: (count) => `Найдено ${count} ${{ one: 'блюдо', few: 'блюда', many: 'блюд' }[russianDishCount.select(count)]}`,
+    dishSearchEmpty: 'Блюда не найдены',
+    dishSearchEmptyHint: 'Попробуйте изменить запрос или снять фильтры.',
+    dishSuggestionSyrniki: 'Сырники',
+    dishSuggestionBorscht: 'Борщ',
+    dishSuggestionChicken: 'Курица',
+    dishSuggestionCompote: 'Компот',
 
     // Статус «открыто / закрыто» (js/hours.js)
     openUntil: (time) => `Открыто до ${time}`,
@@ -112,6 +125,7 @@ export const TEXTS = {
     viewGroup: 'View',
     viewMap: 'Map',
     viewList: 'List',
+    viewDishes: 'Dishes',
     langButton: 'RU',
     langButtonLabel: 'Переключить на русский',
     aboutButton: 'About',
@@ -140,6 +154,16 @@ export const TEXTS = {
 
     search: 'Search by name',
     listEmpty: 'Nothing found. Try another filter.',
+    dishSearchTitle: 'Find a dish',
+    dishSearchLabel: 'Dish name',
+    dishSearchPlaceholder: 'Try cottage cheese pancakes',
+    dishSearchCount: (count) => `${count} ${count === 1 ? 'dish' : 'dishes'} found`,
+    dishSearchEmpty: 'No dishes found',
+    dishSearchEmptyHint: 'Try changing your search or clearing the filters.',
+    dishSuggestionSyrniki: 'Cottage cheese pancakes',
+    dishSuggestionBorscht: 'Borscht',
+    dishSuggestionChicken: 'Chicken',
+    dishSuggestionCompote: 'Compote',
 
     openUntil: (time) => `Open until ${time}`,
     opensToday: (time) => `Closed, opens at ${time}`,

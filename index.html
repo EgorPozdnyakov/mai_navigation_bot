@@ -25,6 +25,7 @@
         <div class="segmented" role="group" aria-label="Вид" data-i18n-aria="viewGroup">
           <button type="button" data-view="map" aria-pressed="true" data-i18n="viewMap">Карта</button>
           <button type="button" data-view="list" aria-pressed="false" data-i18n="viewList">Список</button>
+          <button type="button" data-view="dishes" aria-pressed="false" data-i18n="viewDishes">Блюда</button>
         </div>
         <div class="topbar__actions">
           <!-- Смена языка: на кнопке написан язык, на который переключимся -->
@@ -61,6 +62,28 @@
         <input type="search" id="search" class="search" placeholder="Поиск по названию" aria-label="Поиск по названию" data-i18n-placeholder="search" data-i18n-aria="search">
         <ul id="places-list" class="places-list"></ul>
         <p id="list-empty" class="message" data-i18n="listEmpty" hidden>Ничего не нашлось. Попробуйте другой фильтр.</p>
+      </section>
+
+      <section id="dishes-view" class="dishes-view" aria-labelledby="dish-search-title" hidden>
+        <div class="dish-search">
+          <div class="dish-search__intro">
+            <h2 id="dish-search-title" data-i18n="dishSearchTitle">Поиск по блюдам</h2>
+            <label class="dish-search__field">
+              <span class="dish-search__icon" aria-hidden="true"></span>
+              <input type="search" id="dish-query" placeholder="Например, сырники" aria-label="Название блюда"
+                data-i18n-placeholder="dishSearchPlaceholder" data-i18n-aria="dishSearchLabel" autocomplete="off">
+            </label>
+            <div id="dish-suggestions" class="dish-search__suggestions">
+              <button type="button" data-dish-suggestion="dishSuggestionSyrniki" data-i18n="dishSuggestionSyrniki">Сырники</button>
+              <button type="button" data-dish-suggestion="dishSuggestionBorscht" data-i18n="dishSuggestionBorscht">Борщ</button>
+              <button type="button" data-dish-suggestion="dishSuggestionChicken" data-i18n="dishSuggestionChicken">Курица</button>
+              <button type="button" data-dish-suggestion="dishSuggestionCompote" data-i18n="dishSuggestionCompote">Компот</button>
+            </div>
+          </div>
+          <p id="dish-results-status" class="dish-search__status" role="status" tabindex="-1"></p>
+          <p id="dish-results-empty" class="dish-search__empty" data-i18n="dishSearchEmptyHint" hidden>Попробуйте изменить запрос или снять фильтры.</p>
+          <div id="dish-results" class="dish-results"></div>
+        </div>
       </section>
 
       <!-- Карточка места (выезжает снизу), заполняет app.js -->
