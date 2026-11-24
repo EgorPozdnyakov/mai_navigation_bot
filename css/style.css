@@ -419,7 +419,28 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .back-button { min-height: 44px; padding: 0 8px 0 0; border: 0; background: none; color: var(--link); font-weight: 600; }
 .has-telegram-back .back-button { display: none; }
 
+.menu-source {
+  margin-top: 8px;
+  margin-bottom: 20px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--hint);
+  font-size: 14px;
+}
 
+.menu-source strong { color: var(--text); }
+.menu-category { margin-bottom: 20px; }
+.menu-category h3 { margin: 0 0 4px; font-size: 17px; }
+.menu-list { list-style: none; margin: 0; padding: 0; }
+.menu-list__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.menu-list__price { white-space: nowrap; font-weight: 600; }
 
 /* Фото меню — во всю ширину экрана. */
 .menu-photo { display: block; width: 100%; margin-top: 12px; border-radius: 12px; }

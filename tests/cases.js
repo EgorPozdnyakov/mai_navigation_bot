@@ -1,9 +1,10 @@
-// Проверки для js/hours.js и данных в js/places.js.
+// Проверки времени работы и данных столовых и меню.
 // Запуск: «node --test» в папке проекта или страница tests/tests.html в браузере.
 // Каждая проверка — [название, функция].
 
 import { toMinutes, formatTime, getMoscowTime, getStatus, getQueue } from '../js/hours.js';
 import { PLACES } from '../js/places.js';
+import { MENUS } from '../js/menus.js';
 import { TEXTS, t, setLang, chooseLang, placeText, paymentText } from '../js/i18n.js';
 
 // Сравнение через JSON: подходит и для чисел, и для объектов.
@@ -86,6 +87,23 @@ export const cases = [
       eq(typeof place.price === 'number' && typeof place.accessible === 'boolean', true, `${who}: price и accessible`);
       eq(place.x >= 0 && place.x <= 800 && place.y >= 0 && place.y <= 700, true, `${who}: метка внутри карты 800×700`);
       eq(Array.isArray(place.photos) && Array.isArray(place.menu), true, `${who}: photos и menu — списки`);
+    }
+  }],
+
+  ['У каждой столовой есть меню с переводами и ценами', () => {
+    eq(Object.keys(MENUS).map(Number), PLACES.map((place) => place.id), 'номера столовых и меню совпадают');
+    for (const { id } of PLACES) {
+      const categories = Object.entries(MENUS[id].dishes);
+      eq(categories.length > 0, true, `столовая ${id}: есть категории`);
+      for (const [category, dishes] of categories) {
+        const label = `столовая ${id}, ${category}`;
+        eq(Boolean(TEXTS.ru['menuCategory_' + category] && TEXTS.en['menuCategory_' + category]), true, `${label}: категория переведена`);
+        eq(dishes.length > 0, true, `${label}: есть блюда`);
+        for (const [ru, en, price] of dishes) {
+          eq(Boolean(ru?.trim() && en?.trim()), true, `${label}: блюдо переведено`);
+          eq(Number.isFinite(price) && price > 0, true, `${label}: цена блюда «${ru}»`);
+        }
+      }
     }
   }],
 

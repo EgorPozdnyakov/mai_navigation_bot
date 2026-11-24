@@ -2,6 +2,7 @@
 // Все тексты интерфейса — в js/i18n.js, здесь они берутся через t('ключ').
 
 import { PLACES } from './places.js';
+import { MENUS } from './menus.js';
 import { getMoscowTime, getStatus, getQueue, queueLabel, formatTime, toMinutes } from './hours.js';
 import { t, placeText, paymentText, getLang, setLang, chooseLang, loadSavedLang, translatePage } from './i18n.js';
 import * as map from './map.js';
@@ -216,7 +217,7 @@ function cardHtml(place) {
   return html;
 }
 
-// ---------- Меню (фото) ----------
+// ---------- Меню ----------
 
 let menuPlace = null; // столовая, чьё меню открыто (чтобы перевести экран при смене языка)
 
@@ -231,8 +232,28 @@ function openMenu(place) {
 function fillMenu(place) {
   menuPlace = place;
   const name = placeText(place, 'name');
+  const menu = MENUS[place.id];
   let html = '';
-  if (place.menu.length === 0) {
+  if (menu) {
+    const lang = getLang();
+    const date = menu.date
+      ? new Intl.DateTimeFormat(lang, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(menu.date))
+      : '';
+    const heading = menu.sample ? t('menuSample') : t('menuFromPhoto', date);
+    const note = t(menu.sample ? 'menuSampleNote' : 'menuFromPhotoNote');
+    html = `<p class="menu-source"><strong>${heading}</strong><br>${note}</p>`;
+    for (const [category, dishes] of Object.entries(menu.dishes)) {
+      const items = dishes.map(([nameRu, nameEn, price]) => `
+        <li class="menu-list__item">
+          <span>${lang === 'en' ? nameEn : nameRu}</span>
+          <span class="menu-list__price">${t('rubles', price)}</span>
+        </li>`).join('');
+      html += `<section class="menu-category">
+        <h3>${t('menuCategory_' + category)}</h3>
+        <ul class="menu-list">${items}</ul>
+      </section>`;
+    }
+  } else if (place.menu.length === 0) {
     html = `<p class="message">${t('menuEmpty')}</p>`;
   }
   for (const fileName of place.menu) {
