@@ -23,7 +23,7 @@ export const TEXTS = {
     langButton: 'EN',
     langButtonLabel: 'Switch to English',
     aboutButton: 'О проекте',
-    filters: 'Фильтры',
+    filters: 'Фильтры столовых',
     openNow: 'Открыто сейчас',
     accessibleFilter: '♿ Для маломобильных',
 
@@ -32,8 +32,9 @@ export const TEXTS = {
     legendYellow: 'Небольшая очередь',
     legendRed: 'Большая очередь',
     legendClosed: 'Закрыто',
+    legendCoworking: 'Коворкинг',
 
-    debugBadge: 'Режим разметки: нажмите на карту, чтобы узнать координаты x и y для js/places.js',
+    debugBadge: 'Режим разметки: нажмите на карту, чтобы узнать координаты x и y.',
     debugOutside: 'Эта точка за краем картинки',
     debugCopy: 'Скопировать',
     debugCopied: 'Скопировано',
@@ -111,7 +112,7 @@ export const TEXTS = {
 
     // О проекте
     aboutTitle: 'О проекте',
-    about1: 'Карта столовых на основной территории МАИ (метро «Сокол»). Нажмите на метку, чтобы узнать, открыта ли столовая, где она находится и сколько стоит обед.',
+    about1: 'Карта столовых и коворкингов на основной территории МАИ (метро «Сокол»). Нажмите на метку, чтобы открыть карточку места.',
     about2: 'Приложение сделали студенты МАИ в рамках дисциплины «Обучение служением». Это студенческий проект, а не официальный сервис МАИ.',
     about3: 'Часы работы и цены собирают студенты. Данные могут меняться, уточняйте на месте.',
     about4: 'Цвет метки показывает очередь. Пока это прогноз по времени суток, а не живые данные: настоящее отслеживание очередей — в планах.',
@@ -129,7 +130,7 @@ export const TEXTS = {
     langButton: 'RU',
     langButtonLabel: 'Переключить на русский',
     aboutButton: 'About',
-    filters: 'Filters',
+    filters: 'Canteen filters',
     openNow: 'Open now',
     accessibleFilter: '♿ Wheelchair accessible',
 
@@ -138,8 +139,9 @@ export const TEXTS = {
     legendYellow: 'Short queue',
     legendRed: 'Long queue',
     legendClosed: 'Closed',
+    legendCoworking: 'Study space',
 
-    debugBadge: 'Markup mode: tap the map to get x and y for js/places.js',
+    debugBadge: 'Markup mode: tap the map to get the x and y coordinates.',
     debugOutside: 'This point is outside the map image',
     debugCopy: 'Copy',
     debugCopied: 'Copied',
@@ -212,7 +214,7 @@ export const TEXTS = {
     placeNotFound: (id) => `Canteen No. ${id} not found`,
 
     aboutTitle: 'About',
-    about1: 'A map of the canteens on the main MAI campus (Sokol metro station). Tap a marker to see whether a canteen is open, where it is and how much lunch costs.',
+    about1: 'A map of canteens and study spaces on the main MAI campus (Sokol metro station). Tap a marker for details.',
     about2: 'The app was made by MAI students as part of the Service-Learning course. It is a student project, not an official MAI service.',
     about3: 'Students collect opening hours and prices. They may change, so please check on site.',
     about4: 'The marker colour shows the queue. For now it is a forecast based on the time of day, not live data: real queue tracking is planned.',

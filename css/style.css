@@ -8,6 +8,7 @@
   --surface-2: #f1f3f5;    /* фон второстепенных элементов */
   --text: #1b1f24;
   --marker: #c0262d;       /* метки столовых */
+  --coworking-marker: #7048b8;
   --queue-green: #2b8a3e;  /* очереди нет */
   --queue-yellow: #f2b705; /* небольшая очередь */
   --queue-red: #c92a2a;    /* большая очередь */
@@ -161,6 +162,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .dot--yellow { background: var(--queue-yellow); }
 .dot--red { background: var(--queue-red); }
 .dot--closed { background: #868e96; }
+.dot--coworking { border-radius: 3px; background: var(--coworking-marker); }
 
 /* ---------- Карта ---------- */
 .main { position: relative; flex: 1; min-height: 0; }
@@ -222,6 +224,32 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .marker.queue-yellow .marker__dot { background: var(--queue-yellow); color: #1b1f24; }
 .marker.queue-red .marker__dot { background: var(--queue-red); }
 .marker.is-closed .marker__dot { background: #868e96; color: #ffffff; }
+.marker--coworking .marker__dot {
+  position: relative;
+  border-radius: 7px;
+  background: var(--coworking-marker);
+  font-size: 13px;
+}
+
+/* В плотной группе метка сверху принимает нажатие только в центре. */
+.map .marker--on-top.leaflet-interactive { pointer-events: none; }
+.marker--on-top .marker__dot::after {
+  position: absolute;
+  inset: 2px;
+  pointer-events: auto;
+  content: "";
+}
+
+.marker__stem {
+  position: absolute;
+  bottom: 50%;
+  left: calc(50% - 1px);
+  width: 2px;
+  background: var(--coworking-marker);
+  box-shadow: 0 0 0 1px #fff;
+  pointer-events: none;
+}
+
 .marker.is-selected .marker__dot {
   transform: scale(1.35);
   opacity: 1;
@@ -552,6 +580,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .sheet__header { display: flex; align-items: flex-start; gap: 8px; }
 .sheet__titles { flex: 1; min-width: 0; }
 .sheet__title { margin: 0; font-size: 21px; line-height: 1.25; }
+.sheet__description { margin: 12px 0 0; }
 .sheet__title:focus, .screen__title:focus { outline: none; }
 .sheet__buttons { display: flex; gap: 10px; margin-top: 14px; }
 .sheet__buttons:empty { display: none; }

@@ -1,7 +1,8 @@
-// app.js — главный файл: фильтры, список, карточка столовой, меню, язык и Telegram.
+// app.js — главный файл: фильтры, список, карточки мест, меню, язык и Telegram.
 // Все тексты интерфейса — в js/i18n.js, здесь они берутся через t('ключ').
 
 import { PLACES } from './places.js';
+import { COWORKINGS } from './coworkings.js';
 import { MENUS } from './menus.js';
 import { findDishes } from './dish-search.js';
 import { getMoscowTime, getStatus, getQueue, queueLabel, formatTime, toMinutes } from './hours.js';
@@ -9,6 +10,7 @@ import { t, placeText, paymentText, getLang, setLang, chooseLang, loadSavedLang,
 import * as map from './map.js';
 
 const PHOTOS_FOLDER = 'media/photos/';
+const MAP_PLACES = [...PLACES, ...COWORKINGS];
 
 // ---------- Состояние приложения ----------
 const statuses = {};        // id столовой → { open, text, queue }, пересчитываем раз в минуту
@@ -16,7 +18,7 @@ let view = 'map';           // 'map', 'list' или 'dishes'
 let openNowOnly = false;    // фильтр «Открыто сейчас»
 let accessibleOnly = false; // фильтр ♿
 let search = '';            // поиск в списке
-let selectedId = null;      // столовая, чья карточка открыта
+let selectedId = null;      // id места, чья карточка открыта
 let mapLoaded = false;
 
 const debug = new URLSearchParams(location.search).get('debug') === '1'; // режим разметки
@@ -33,7 +35,7 @@ function $(id) {
 }
 
 function findPlace(id) {
-  return PLACES.find((place) => place.id === id);
+  return MAP_PLACES.find((place) => place.id === id);
 }
 
 // Ссылка на фото из папки media/photos/
@@ -87,20 +89,25 @@ function render() {
   $('open-now').setAttribute('aria-pressed', openNowOnly);
   $('accessible').setAttribute('aria-pressed', accessibleOnly);
 
-  for (const place of PLACES) {
+  for (const place of MAP_PLACES) {
     const status = statuses[place.id];
     const selected = place.id === selectedId;
+    const name = placeText(place, 'name');
+    if (!status) {
+      map.updateMarker(place.id, true, false, null, selected, `${place.marker}. ${name}`);
+      continue;
+    }
     // Выбранную столовую показываем всегда, иначе метка пропала бы под карточкой.
     const show = matchesFilters(place) || selected;
-    const label = `${place.id}. ${placeText(place, 'name')}. ${status.text}. ${queueText(status)}`.replace(/\. $/, '');
+    const label = `${place.id}. ${name}. ${status.text}. ${queueText(status)}`.replace(/\. $/, '');
     map.updateMarker(place.id, show, !status.open, status.queue, selected, label);
   }
 
   renderList();
   if (view === 'dishes') renderDishes();
 
-  if (selectedId !== null) {
-    const status = statuses[selectedId];
+  const status = statuses[selectedId];
+  if (status) {
     $('sheet-status').className = status.open ? 'status status--open' : 'status status--closed';
     $('sheet-status').textContent = status.text;
     $('sheet-queue').outerHTML = queueHtml(status, 'sheet-queue');
@@ -187,7 +194,7 @@ function renderDishes() {
   if (focused) ($(focused) || $('dish-query')).focus({ preventScroll: true });
 }
 
-// ---------- Карточка столовой ----------
+// ---------- Карточка места ----------
 
 // Открыть карточку. zoomIn — приблизить карту к метке (из списка и по ссылке).
 function openCard(id, zoomIn) {
@@ -220,29 +227,42 @@ function closeCard() {
 
 // Заполнить карточку (при открытии и при смене языка).
 function fillCard(place) {
-  $('sheet').innerHTML = cardHtml(place);
+  if (COWORKINGS.includes(place)) {
+    $('sheet').innerHTML = `${galleryHtml(place)}
+      <div class="sheet__header">
+        <div class="sheet__titles">
+          <h2 id="sheet-title" class="sheet__title" tabindex="-1">${placeText(place, 'name')}</h2>
+        </div>
+        <button type="button" id="sheet-close" class="icon-button" aria-label="${t('closeCard')}">×</button>
+      </div>
+      <dl class="details">
+        <div class="details__row"><dt>${t('where')}</dt><dd>${placeText(place, 'where')}</dd></div>
+      </dl>
+      <p class="sheet__description">${placeText(place, 'description')}</p>`;
+  } else {
+    $('sheet').innerHTML = cardHtml(place);
+    $('menu-button').onclick = () => openMenu(place);
+  }
   $('sheet-close').onclick = closeCard;
-  $('menu-button').onclick = () => openMenu(place);
+}
+
+function galleryHtml(place) {
+  const name = placeText(place, 'name');
+  if (!place.photos.length) {
+    return `<div class="photos photos--empty">${t('noPhoto')}</div>`;
+  }
+
+  const images = place.photos.map((fileName, index) =>
+    `<img class="photos__item" src="${photoUrl(fileName)}" alt="${t('photoAlt', name, index + 1)}" loading="lazy" onerror="this.remove()">`
+  );
+  return `<div class="photos">${images.join('')}</div>`;
 }
 
 function cardHtml(place) {
   const name = placeText(place, 'name');
   const status = statuses[place.id];
-  let html = '';
-
-  // Фото листаются вбок. Если файла нет — фото просто пропадает.
-  if (place.photos.length > 0) {
-    html += '<div class="photos">';
-    for (let i = 0; i < place.photos.length; i++) {
-      html += `<img class="photos__item" src="${photoUrl(place.photos[i])}" alt="${t('photoAlt', name, i + 1)}" loading="lazy" onerror="this.remove()">`;
-    }
-    html += '</div>';
-  } else {
-    html += `<div class="photos photos--empty">${t('noPhoto')}</div>`;
-  }
-
   const hours = formatTime(toMinutes(place.open)) + '–' + formatTime(toMinutes(place.close));
-  html += `
+  return `${galleryHtml(place)}
     <div class="sheet__header">
       <div class="sheet__titles">
         <h2 id="sheet-title" class="sheet__title" tabindex="-1">${name}</h2>
@@ -261,7 +281,6 @@ function cardHtml(place) {
       <div class="details__row"><dt>${t('payment')}</dt><dd>${paymentText(place.payment)}</dd></div>
       <div class="details__row"><dt>${t('accessibility')}</dt><dd>${place.accessible ? t('accessibleYes') : t('accessibleNo')}</dd></div>
     </dl>`;
-  return html;
 }
 
 // ---------- Меню ----------
@@ -432,7 +451,7 @@ async function startMap() {
     return;
   }
   mapLoaded = true;
-  map.addMarkers(PLACES, debug, (id) => openCard(id, false));
+  map.addMarkers(MAP_PLACES, debug, (id) => openCard(id, false));
   render();
   // Карточку могли открыть по ссылке раньше, чем загрузилась карта.
   if (selectedId !== null) map.showPlace(selectedId, true);

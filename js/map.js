@@ -106,14 +106,19 @@ export function refreshSize() {
   if (map) map.invalidateSize();
 }
 
-// Ставит метки столовых.
+// Ставит метки столовых и коворкингов.
 export function addMarkers(places, debug, onClick) {
   for (const place of places) {
-    // Метка — область 44×44 px (легко попасть пальцем), внутри кружок с номером.
+    // Метка занимает 44×44 px, даже если значок внутри меньше.
+    const offsetY = place.markerOffsetY ?? 0;
+    const stem = offsetY
+      ? `<span class="marker__stem" style="height:${offsetY}px" aria-hidden="true"></span>`
+      : '';
     const icon = L.divIcon({
-      className: 'marker',
-      html: `<span class="marker__dot" aria-hidden="true">${place.id}</span>`,
+      className: ['marker', place.marker && 'marker--coworking', place.markerOnTop && 'marker--on-top'].filter(Boolean).join(' '),
+      html: `${stem}<span class="marker__dot" aria-hidden="true">${place.marker ?? place.id}</span>`,
       iconSize: [44, 44],
+      iconAnchor: [22, 22 - offsetY],
     });
     const marker = L.marker([-place.y, place.x], { icon });
     marker.on('click', () => onClick(place.id));
@@ -144,7 +149,8 @@ export function updateMarker(id, show, closed, queue, selected, label) {
   element.classList.toggle('queue-red', queue === 'red');
   element.classList.toggle('is-selected', selected);
   element.setAttribute('aria-label', label);
-  marker.setZIndexOffset(selected ? 1000 : 0);
+  const offset = element.classList.contains('marker--on-top') ? 100 : 0;
+  marker.setZIndexOffset(selected ? 1000 : offset);
 }
 
 // Показать метку над карточкой. zoomIn — ещё и приблизить (из списка или по ссылке).
@@ -153,7 +159,8 @@ export function showPlace(id, zoomIn) {
   if (!marker) return;
 
   // Метку и так хорошо видно — карту не двигаем.
-  const point = map.latLngToContainerPoint(marker.getLatLng());
+  const offset = L.point([22, 22]).subtract(L.point(marker.options.icon.options.iconAnchor));
+  const point = map.latLngToContainerPoint(marker.getLatLng()).add(offset);
   const size = map.getSize();
   const visible = point.x > 40 && point.x < size.x - 40 && point.y > 40 && point.y < size.y - bottomInset - 40;
   if (visible && !zoomIn) return;
@@ -161,7 +168,7 @@ export function showPlace(id, zoomIn) {
   let zoom = map.getZoom();
   if (zoomIn) zoom = Math.min(map.getMaxZoom(), Math.max(zoom, fitZoom + 1));
   // Сдвигаем центр вниз на половину карточки: метка окажется посередине видимой части.
-  const center = map.project(marker.getLatLng(), zoom).add([0, bottomInset / 2]);
+  const center = map.project(marker.getLatLng(), zoom).add(offset).add([0, bottomInset / 2]);
   map.setView(map.unproject(center, zoom), zoom);
 }
 

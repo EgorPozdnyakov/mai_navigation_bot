@@ -4,6 +4,7 @@
 
 import { toMinutes, formatTime, getMoscowTime, getStatus, getQueue } from '../js/hours.js';
 import { PLACES } from '../js/places.js';
+import { COWORKINGS } from '../js/coworkings.js';
 import { MENUS } from '../js/menus.js';
 import { findDishes } from '../js/dish-search.js';
 import { TEXTS, t, setLang, chooseLang, placeText, paymentText } from '../js/i18n.js';
@@ -88,6 +89,15 @@ export const cases = [
       eq(typeof place.price === 'number' && typeof place.accessible === 'boolean', true, `${who}: price и accessible`);
       eq(place.x >= 0 && place.x <= 800 && place.y >= 0 && place.y <= 700, true, `${who}: метка внутри карты 800×700`);
       eq(Array.isArray(place.photos) && Array.isArray(place.menu), true, `${who}: photos и menu — списки`);
+    }
+  }],
+
+  ['Столовые и коворкинги используют уникальные метки на общей карте', () => {
+    const ids = [...PLACES, ...COWORKINGS].map(({ id }) => String(id));
+    eq(new Set(ids).size, ids.length);
+    for (const { id, marker, x, y } of COWORKINGS) {
+      eq(Boolean(marker), true, `${id}: есть подпись метки`);
+      eq(x >= 0 && x <= 800 && y >= 0 && y <= 700, true, `${id}: метка внутри карты`);
     }
   }],
 

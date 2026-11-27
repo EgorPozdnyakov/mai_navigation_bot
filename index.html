@@ -33,7 +33,7 @@
           <button type="button" class="icon-button icon-button--info" id="about-button" aria-label="О проекте" data-i18n-aria="aboutButton">i</button>
         </div>
       </div>
-      <div class="chips" role="group" aria-label="Фильтры" data-i18n-aria="filters">
+      <div class="chips" role="group" aria-label="Фильтры столовых" data-i18n-aria="filters">
         <button type="button" class="chip" id="open-now" aria-pressed="false" data-i18n="openNow">Открыто сейчас</button>
         <button type="button" class="chip" id="accessible" aria-pressed="false" data-i18n="accessibleFilter">♿ Для маломобильных</button>
       </div>
@@ -48,8 +48,9 @@
           <li><span class="dot dot--yellow"></span><span data-i18n="legendYellow">Небольшая очередь</span></li>
           <li><span class="dot dot--red"></span><span data-i18n="legendRed">Большая очередь</span></li>
           <li><span class="dot dot--closed"></span><span data-i18n="legendClosed">Закрыто</span></li>
+          <li><span class="dot dot--coworking"></span><span data-i18n="legendCoworking">Коворкинг</span></li>
         </ul>
-        <p id="debug-badge" class="debug-badge" data-i18n="debugBadge" hidden>Режим разметки: нажмите на карту, чтобы узнать координаты x и y для js/places.js</p>
+        <p id="debug-badge" class="debug-badge" data-i18n="debugBadge" hidden>Режим разметки: нажмите на карту, чтобы узнать координаты x и y.</p>
         <div id="map-error" class="map-error" role="alert" hidden>
           <p><b data-i18n="mapErrorTitle">Не удалось загрузить карту кампуса.</b></p>
           <p data-i18n="mapErrorHint">Проверьте, что файл media/map.jpg есть на сайте. Пока можно посмотреть столовые списком.</p>
@@ -105,8 +106,8 @@
       <section class="modal__box" role="dialog" aria-modal="true" aria-labelledby="about-title">
         <!-- Тексты окна — в js/i18n.js, здесь — русский вариант до запуска скрипта -->
         <h2 id="about-title" data-i18n="aboutTitle">О проекте</h2>
-        <p data-i18n="about1">Карта столовых на основной территории МАИ (метро «Сокол»).
-          Нажмите на метку, чтобы узнать, открыта ли столовая, где она находится и сколько стоит обед.</p>
+        <p data-i18n="about1">Карта столовых и коворкингов на основной территории МАИ (метро «Сокол»).
+          Нажмите на метку, чтобы открыть карточку места.</p>
         <p data-i18n="about2">Приложение сделали студенты МАИ в рамках дисциплины «Обучение служением».
           Это студенческий проект, а не официальный сервис МАИ.</p>
         <p data-i18n="about3">Часы работы и цены собирают студенты. Данные могут меняться, уточняйте на месте.</p>
